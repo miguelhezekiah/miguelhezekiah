@@ -8,7 +8,6 @@ export const Route = createFileRoute("/admin/login")({
 
 function AdminLogin() {
   const nav = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -25,20 +24,11 @@ function AdminLogin() {
     setErr(null);
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin + "/admin" },
-        });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
       nav({ to: "/admin" });
-    } catch (e: any) {
-      setErr(e.message ?? "Failed");
+    } catch {
+      setErr("Invalid email or password.");
     } finally {
       setBusy(false);
     }
@@ -49,9 +39,9 @@ function AdminLogin() {
       <form onSubmit={submit} className="w-full max-w-sm space-y-6">
         <div>
           <div className="label label-muted mb-2">Admin</div>
-          <h1 className="display text-3xl">{mode === "signup" ? "Create admin" : "Sign in"}</h1>
+          <h1 className="display text-3xl">Sign in</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            The first account becomes admin automatically.
+            Admin accounts are provisioned by invitation only.
           </p>
         </div>
         <div className="space-y-3">
@@ -79,16 +69,9 @@ function AdminLogin() {
           disabled={busy}
           className="w-full bg-foreground text-background py-2 text-sm disabled:opacity-50"
         >
-          {busy ? "…" : mode === "signup" ? "Create account" : "Sign in"}
+          {busy ? "…" : "Sign in"}
         </button>
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <button
-            type="button"
-            onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
-            className="hover:underline"
-          >
-            {mode === "signup" ? "Have an account? Sign in" : "First time? Create account"}
-          </button>
+        <div className="flex justify-end text-xs text-muted-foreground">
           <Link to="/" className="hover:underline">← Back</Link>
         </div>
       </form>

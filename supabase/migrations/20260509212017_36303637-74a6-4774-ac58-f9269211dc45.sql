@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS public.promote_first_user() CASCADE;
