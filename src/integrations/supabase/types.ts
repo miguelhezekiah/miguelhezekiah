@@ -14,7 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      experience: {
+        Row: {
+          created_at: string
+          id: string
+          note: string
+          org: string
+          role: string
+          sort_order: number
+          years: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note: string
+          org: string
+          role: string
+          sort_order?: number
+          years: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string
+          org?: string
+          role?: string
+          sort_order?: number
+          years?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          body: string[]
+          category: string
+          created_at: string
+          gallery_urls: string[]
+          hero_image_url: string | null
+          id: string
+          location: string
+          metrics: Json
+          role: string
+          slug: string
+          sort_order: number
+          summary: string
+          tags: string[]
+          title: string
+          year: string
+        }
+        Insert: {
+          body?: string[]
+          category: string
+          created_at?: string
+          gallery_urls?: string[]
+          hero_image_url?: string | null
+          id?: string
+          location: string
+          metrics?: Json
+          role: string
+          slug: string
+          sort_order?: number
+          summary: string
+          tags?: string[]
+          title: string
+          year: string
+        }
+        Update: {
+          body?: string[]
+          category?: string
+          created_at?: string
+          gallery_urls?: string[]
+          hero_image_url?: string | null
+          id?: string
+          location?: string
+          metrics?: Json
+          role?: string
+          slug?: string
+          sort_order?: number
+          summary?: string
+          tags?: string[]
+          title?: string
+          year?: string
+        }
+        Relationships: []
+      }
+      writing: {
+        Row: {
+          body: string | null
+          created_at: string
+          date: string
+          excerpt: string
+          id: string
+          read_time: string
+          slug: string
+          sort_order: number
+          tag: string
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          date: string
+          excerpt: string
+          id?: string
+          read_time: string
+          slug: string
+          sort_order?: number
+          tag: string
+          title: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          date?: string
+          excerpt?: string
+          id?: string
+          read_time?: string
+          slug?: string
+          sort_order?: number
+          tag?: string
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
