@@ -1,26 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { HeroRotator } from "@/components/site/HeroRotator";
+import { useProjects } from "@/lib/portfolio";
+import { siteConfig } from "@/config/site";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: `${siteConfig.name} — Index` },
+      {
+        name: "description",
+        content: `Selected work by ${siteConfig.name}, ${siteConfig.role}. ${siteConfig.bio.short}`,
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  const { data: projects = [] } = useProjects();
+  return (
+    <main className="relative min-h-dvh">
+      <HeroRotator projects={projects} />
+    </main>
+  );
 }
