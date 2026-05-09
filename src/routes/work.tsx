@@ -48,7 +48,7 @@ function WorkIndex() {
     let xs = projects.filter(
       (p) =>
         (cat.length === 0 || cat.includes(p.category)) &&
-        (tag.length === 0 || tag.some((t) => p.tags.includes(t))),
+        (tag.length === 0 || tag.some((t: string) => p.tags.includes(t))),
     );
     xs = [...xs].sort((a, b) => {
       switch (sort) {
@@ -63,7 +63,7 @@ function WorkIndex() {
 
   const toggle = (key: "cat" | "tag", val: string) =>
     navigate({
-      search: (prev) => {
+      search: (prev: any) => {
         const cur = (prev as any)[key] as string[];
         const next = cur.includes(val) ? cur.filter((x) => x !== val) : [...cur, val];
         return { ...prev, [key]: next };
@@ -90,7 +90,7 @@ function WorkIndex() {
             {(["grid", "list"] as const).map((v) => (
               <button
                 key={v}
-                onClick={() => navigate({ search: (p) => ({ ...p, view: v }) })}
+                onClick={() => navigate({ search: (p: any) => ({ ...p, view: v }) })}
                 className={`label transition-opacity ${view === v ? "opacity-100 underline underline-offset-4" : "opacity-50 hover:opacity-100"}`}
               >
                 {v}
@@ -109,7 +109,7 @@ function WorkIndex() {
             ).map(([k, lbl]) => (
               <button
                 key={k}
-                onClick={() => navigate({ search: (p) => ({ ...p, sort: k }) })}
+                onClick={() => navigate({ search: (p: any) => ({ ...p, sort: k }) })}
                 className={`label transition-opacity ${sort === k ? "opacity-100 underline underline-offset-4" : "opacity-50 hover:opacity-100"}`}
               >
                 {lbl}
@@ -145,7 +145,7 @@ function WorkIndex() {
 
           {hasFilter && (
             <button
-              onClick={() => navigate({ search: (p) => ({ ...p, cat: [], tag: [] }) })}
+              onClick={() => navigate({ search: (p: any) => ({ ...p, cat: [], tag: [] }) })}
               className="label opacity-60 hover:opacity-100 ml-auto"
             >
               Clear ✕
