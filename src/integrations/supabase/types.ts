@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       experience: {
         Row: {
           created_at: string
@@ -41,6 +56,36 @@ export type Database = {
           role?: string
           sort_order?: number
           years?: string
+        }
+        Relationships: []
+      }
+      now_items: {
+        Row: {
+          author: string | null
+          created_at: string
+          id: string
+          kind: string
+          note: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          author?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          author?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string
+          sort_order?: number
+          title?: string
         }
         Relationships: []
       }
@@ -142,7 +187,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

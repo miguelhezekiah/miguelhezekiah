@@ -1,140 +1,136 @@
 
-## Goal
+## 1. Global grid + spacing system (full-bleed, responsive)
 
-Rebuild the portfolio in the minimal, slow-cinematic aesthetic of `simonholm.studio`, using your existing content from `miguelhezekiah.github.io`. Content lives in Lovable Cloud (editable without code changes). Hosted via Lovable + GitHub sync. All repeatable values live in a single config file.
+`src/styles.css` tokens (single source of truth):
+- `--grid-cols: 6` mobile, `12` ≥768px (via media query)
+- `--grid-gap: clamp(12px, 1.4vw, 16px)`
+- `--site-padding-x: clamp(16px, 2vw, 24px)`
+- `--site-padding-y: clamp(16px, 2.4vh, 28px)`
+- `--section-gap: clamp(96px, 14vh, 180px)`
 
-## Hosting
-
-Lovable hosting + GitHub two-way sync. Code stays on GitHub; deploy via Lovable's Publish button. Lovable Cloud (database + storage) is enabled in the same project — no separate accounts.
-
-## Content source — Lovable Cloud
-
-Three tables (public read, no public writes):
-
+New `<PageGrid>` wrapper used by EVERY route:
 ```
-projects     id, slug, title, year, category, role, location,
-             summary, body (text[]), tags (text[]),
-             metrics (jsonb [["label","value"]]),
-             hero_image_url, gallery_urls (text[]),
-             sort_order, created_at
-
-writing      id, slug, title, date, read_time, tag,
-             excerpt, body, sort_order, created_at
-
-experience   id, role, org, years, note, sort_order, created_at
+.page-grid { display:grid; grid-template-columns:repeat(var(--grid-cols),1fr); gap:var(--grid-gap); padding:var(--site-padding-y) var(--site-padding-x); }
 ```
+Utility classes `.col-1`…`.col-12` and `.col-span-1`…`.col-span-12` declared in styles.css. Children declare their span explicitly. Dev `?debug=grid` overlay shows guides.
 
-Storage bucket `portfolio-assets` (public read) for images. RLS: public SELECT only.
+## 2. Typography → Helvetica (one family for everything)
 
-I'll seed the tables with the 6 projects, 4 writing entries, and 5 experience rows from your current `data.jsx`. Hero images start as placeholder dark gradients; you swap them later by editing one URL field per row in the Cloud dashboard — no rebuild needed.
+- Drop Fraunces + Inter Tight + Google Fonts link.
+- `--font-sans-stack: "Helvetica Neue", Helvetica, Arial, "Inter", system-ui, sans-serif`
+- `--font-display-stack` = same stack, just lighter weight (300) and tighter tracking (-0.02em).
+- All `.display`, `.label`, body — same family.
 
-`now_items`, bio, name, role, socials live in the centralized config file (small, rarely changed).
+## 3. Navigation: About / Work / Thinking / Contact
 
-## Centralized variables — one source of truth
+- `siteConfig.nav` updated to those 4, in that order.
+- `CornerLabels` + `IndexCounter` reflect new set.
 
-`src/config/site.ts`:
+## 4. Home (`/`) — hero + scrollable About below
 
-```ts
-export const siteConfig = {
-  name: "Miguel Hezekiah",
-  role: "Computational Designer",
-  copyright: "©2026",
-  email: "hello@...",
-  socials: { instagram, linkedin, github },
-  nav: [
-    { label: "Index",    to: "/" },
-    { label: "Work",     to: "/work" },
-    { label: "Thinking", to: "/thinking" },
-    { label: "About",    to: "/about" },
-    { label: "Contact",  to: "/contact" },
-  ],
-  bio: { short, long },
-  nowItems: [...],
-};
+- `/` = full-viewport rotating hero (100dvh) → scroll down reveals shared `<AboutSection>`.
+- `/about` route still exists (deep-link), renders the same `<AboutSection>` component. DRY.
+- Small chevron + "scroll" label at hero bottom-center.
 
-export const motionConfig = {
-  ease: [0.65, 0, 0.35, 1] as const,
-  pageDuration: 0.7,
-  heroCrossfadeDuration: 1.2,
-  heroIntervalMs: 4500,
-  hoverDuration: 0.5,
-  revealDuration: 0.7,
-};
-```
+## 5. Hero bug fix (the "turns pitch black" issue)
 
-Design tokens (colors, font stack, base sizes) live as CSS variables in `src/styles.css`. Same DRY rule — change once, cascades everywhere.
+Cause: `AnimatePresence` without `mode="wait"`, and the previous frame unmounts before the next paints → flash of empty bg.
 
-## Visual system
+Fix:
+- Two stacked `<img>` layers; crossfade by toggling opacity between them, never unmount.
+- Preload next via `new Image()` before swap.
+- Guard against empty array + index overflow on hot reload.
 
-- `--background` near-black `oklch(0.16 0.005 260)`
-- `--foreground` off-white `oklch(0.92 0.005 260)`
-- `--muted-foreground` for counters/meta
-- One neutral grotesk via Google Fonts in root `head()`
-- Tiny uniform sans for nav and corner labels; large display reserved for case-study titles
-- Generous negative space, no borders, no cards, no shadows
+## 6. Image upload — small admin page
 
-## Motion system
+Routes (NOT in public nav):
+- `/admin/login` — email + password.
+- `/admin` — gated; tabs: **Projects | Writing | Experience | Now items**. Inline edit, drop-zone uploads to `portfolio-assets/{table}/{slug}-{ts}.{ext}`, writes public URL into the row. Reorder by `sort_order`.
 
-`framer-motion`, all timings pulled from `motionConfig`:
+Backend:
+- New table `admins(user_id uuid PK)` + `is_admin(uid)` SECURITY DEFINER fn.
+- New table `now_items(id, kind, title, author, note, sort_order)` so Now is editable too.
+- RLS: public SELECT stays; INSERT/UPDATE/DELETE on `projects/writing/experience/now_items` allowed only when `is_admin(auth.uid())`.
+- Storage RLS on `portfolio-assets`: public read; admin write.
+- Trigger: first signup auto-promoted to admin; later signups stay non-admin.
+- Auto-confirm email ON for `/admin` (you log in immediately after signup).
 
-- 700ms eased page transitions (8px translateY + opacity)
-- 1200ms hero cross-fade with 1.04 → 1.0 scale, auto-rotate every 4500ms
-- 500ms hover shift (~12px) on Work rows, image preview fades in to the right
-- 700ms scroll reveals on scroll-into-view sections
-- No springs, no bounce
+Result: upload + edit content in-app, no Supabase dashboard.
 
-## Routes
+## 7. Work page (`/work`) — sort, filter, view toggle
+
+Sticky toolbar:
+- **View:** Grid (default) ↔ List — `?view=grid|list`
+- **Sort:** Year ↓ (default) / Year ↑ / Alphabetical / Type — `?sort=`
+- **Filter:** Category chips + Tag chips, multi-select, layered AND — `?cat=…&tag=…`
+- "Clear" button when any filter active.
+
+Search params validated with `zodValidator` + `fallback`.
+
+Grid view: 12-col, cards span 4 desktop / 3 mobile (3-up desktop, 2-up mobile). Square crop. Hover: image scale 1.02, title shifts up 4px.
+
+List view: current row layout + hover preview pane.
+
+Switching views: `AnimatePresence` fade+slide-up.
+
+## 8. Thinking page (`/thinking`) — Essays / Now toggle
+
+- Two underlined text links at top: "Essays" / "Now". Active = solid underline, inactive = 0.4 opacity.
+- `?view=essays|now` (default essays).
+- Switch animation: outgoing fade+slide-up 12px (200ms), incoming fade+slide-up from +12px (300ms). Honors `prefers-reduced-motion`.
+- "Now" sourced from `now_items` table (so it's editable in admin).
+- About page no longer has Now section.
+
+## 9. Page transition — subtle horizontal sweep
+
+Replace current vertical fade with:
+- Outgoing: opacity 1→0, x 0→ -24px (300ms, eased)
+- Incoming: opacity 0→1, x +24px → 0 (500ms, eased, slight 100ms delay)
+- Whole-page transition runs in `<PageTransition>` via `AnimatePresence mode="wait"`.
+- Disabled under `prefers-reduced-motion`.
+
+## 10. Other refinements (confirmed yes)
+
+- Slim footer (email + socials + © year, sourced from `siteConfig`).
+- Skeleton loaders matching layout (replace "Loading…").
+- 404 + error pages restyled with display type + grid.
+- Favicon + OG image: I'll generate dark monogram placeholders (swap later in admin).
+- Global `prefers-reduced-motion` kill switch for hero rotation, page sweep, slide tabs.
+- Custom cursor stays; auto-disabled on touch / ≤768px.
+- Hero center-crops on portrait — confirmed OK.
+
+## Technical layout
 
 ```text
-src/routes/
-  __root.tsx          shared chrome (corner labels, cursor, page transition)
-  index.tsx           / — full-bleed hero rotator + index counter (0 1)
-  work.tsx            /work — vertical project list, hover preview
-  work.$slug.tsx      /work/:slug — case study (summary, body, metrics, gallery)
-  about.tsx           /about — bio, experience timeline, Now list
-  thinking.tsx        /thinking — writing index
-  thinking.$slug.tsx  /thinking/:slug — article view
-  contact.tsx         /contact — single-screen email + socials
+src/
+  config/site.ts          ← nav, motion (sweep timings), copyright
+  styles.css              ← grid + Helvetica tokens, col-span utils
+  components/site/
+    PageGrid.tsx          ← NEW; wraps every route
+    AboutSection.tsx      ← NEW; shared / and /about
+    HeroRotator.tsx       ← FIX (no black flash)
+    PageTransition.tsx    ← horizontal sweep
+    Footer.tsx            ← NEW
+    Skeleton.tsx          ← NEW
+    work/Toolbar.tsx, GridView.tsx, ListView.tsx
+    thinking/Tabs.tsx, NowList.tsx
+    admin/Layout.tsx, ProjectsTab.tsx, WritingTab.tsx, ExperienceTab.tsx, NowTab.tsx, ImageDropzone.tsx
+  routes/
+    index.tsx             ← hero + AboutSection
+    about.tsx             ← AboutSection only
+    work.tsx              ← search-param driven (zod)
+    thinking.tsx          ← essays↔now
+    contact.tsx           ← grid refactor
+    admin.tsx             ← layout + auth gate
+    admin.login.tsx
+  lib/portfolio.ts        ← + useNowItems, useUpsertX, useUploadAsset, useIsAdmin
+
+migrations:
+  - admins + is_admin()
+  - now_items table + seed from siteConfig.nowItems
+  - admin-only write RLS on projects/writing/experience/now_items
+  - storage write RLS on portfolio-assets
+  - trigger: first signup → admin
 ```
 
-Each route has its own `head()` for SEO (title, description, og tags). Where applicable, leaf routes set `og:image` from the loaded hero URL.
-
-## Components
-
-- `<CornerLabels />` — name (TL), role (TR), Index counter (BL), copyright (BR)
-- `<IndexCounter idx total />` — animated digit ticker
-- `<Cursor />` — subtle follow accent (disabled on touch)
-- `<PageTransition />` — wraps `<Outlet />` in `__root`
-- `<HeroRotator projects />`, `<WorkRow project />`, `<ScrollReveal />`
-
-## Data layer
-
-- Browser Supabase client + TanStack Query hooks: `useProjects()`, `useProject(slug)`, `useWriting()`, `useArticle(slug)`, `useExperience()`
-- Public reads only — no server functions needed for v1
-- Sorted by `sort_order` asc
-
-## Real assets — swap later
-
-You upload via Lovable Cloud → Storage (or paste any public URL into the row's `hero_image_url` field). Until then, each row gets a deterministic dark gradient placeholder generated from the project slug — same dimensions, same aesthetic, no layout shift on swap.
-
-## Out of scope
-
-- Admin UI for editing content (use the Cloud dashboard — already a CMS)
-- Auth (portfolio is fully public)
-- Contact form submission (mailto link only)
-- Analytics, comments, i18n
-
-## Technical notes
-
-- TanStack Start file-based routes, Tailwind v4 via `styles.css`, framer-motion added via `bun add`
-- Browser Supabase client only (`@/integrations/supabase/client`); no `createServerFn` needed since all data is public-read
-- Routes that fetch from Supabase use `useQuery` in components, not loaders, to avoid SSR/auth coupling
-- `siteConfig.nav` drives both header and footer to keep them in sync
-
-## What I need from you (later, not now)
-
-- 6 hero images (≥1920×1200 JPG/WebP) — upload to the Storage bucket
-- Final email + social URLs (currently placeholder)
-- Optional: headshot for /about, favicon
-
-Everything is editable post-launch with zero code changes.
+Implementation order: tokens+grid+Helvetica → hero fix → nav + home scroll → page-sweep transition → admin (auth, RLS, UI) → work toolbar → thinking tabs → footer/skeletons/404/favicon.

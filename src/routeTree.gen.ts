@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkRouteImport } from './routes/work'
 import { Route as ThinkingRouteImport } from './routes/thinking'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkSlugRouteImport } from './routes/work.$slug'
 import { Route as ThinkingSlugRouteImport } from './routes/thinking.$slug'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const WorkRoute = WorkRouteImport.update({
   id: '/work',
@@ -30,6 +32,11 @@ const ThinkingRoute = ThinkingRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -52,22 +59,31 @@ const ThinkingSlugRoute = ThinkingSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ThinkingRoute,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/thinking': typeof ThinkingRouteWithChildren
   '/work': typeof WorkRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/thinking/$slug': typeof ThinkingSlugRoute
   '/work/$slug': typeof WorkSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/thinking': typeof ThinkingRouteWithChildren
   '/work': typeof WorkRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/thinking/$slug': typeof ThinkingSlugRoute
   '/work/$slug': typeof WorkSlugRoute
 }
@@ -75,9 +91,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
   '/thinking': typeof ThinkingRouteWithChildren
   '/work': typeof WorkRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/thinking/$slug': typeof ThinkingSlugRoute
   '/work/$slug': typeof WorkSlugRoute
 }
@@ -86,27 +104,33 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
     | '/thinking'
     | '/work'
+    | '/admin/login'
     | '/thinking/$slug'
     | '/work/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
     | '/thinking'
     | '/work'
+    | '/admin/login'
     | '/thinking/$slug'
     | '/work/$slug'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
     | '/thinking'
     | '/work'
+    | '/admin/login'
     | '/thinking/$slug'
     | '/work/$slug'
   fileRoutesById: FileRoutesById
@@ -114,6 +138,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
   ThinkingRoute: typeof ThinkingRouteWithChildren
   WorkRoute: typeof WorkRouteWithChildren
@@ -140,6 +165,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -170,8 +202,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ThinkingSlugRouteImport
       parentRoute: typeof ThinkingRoute
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ThinkingRouteChildren {
   ThinkingSlugRoute: typeof ThinkingSlugRoute
@@ -198,6 +247,7 @@ const WorkRouteWithChildren = WorkRoute._addFileChildren(WorkRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
   ThinkingRoute: ThinkingRouteWithChildren,
   WorkRoute: WorkRouteWithChildren,
@@ -205,13 +255,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

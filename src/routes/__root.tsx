@@ -18,11 +18,13 @@ function NotFoundComponent() {
   return (
     <main className="flex min-h-dvh items-center justify-center px-6">
       <div className="text-center">
-        <div className="label label-muted">404</div>
-        <h1 className="display mt-4 text-5xl">Not here.</h1>
-        <p className="mt-4 text-sm text-muted-foreground">This page does not exist.</p>
-        <Link to="/" className="label mt-8 inline-block underline-offset-4 hover:underline">
-          ← Index
+        <div className="label label-muted">404 — Not Found</div>
+        <h1 className="display mt-6 text-[clamp(3rem,10vw,7rem)]">Off the map.</h1>
+        <p className="mt-6 text-sm text-muted-foreground max-w-sm mx-auto">
+          The page you're looking for has either moved, never existed, or was a passing thought.
+        </p>
+        <Link to="/" className="label mt-10 inline-block underline-offset-4 hover:underline">
+          ← Return home
         </Link>
       </div>
     </main>
@@ -68,15 +70,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&family=Fraunces:opsz,wght@9..144,200;9..144,300;9..144,400&display=swap",
-      },
-    ],
+    links: [{ rel: "stylesheet", href: appCss }],
   }),
   shellComponent: RootShell,
   component: RootComponent,

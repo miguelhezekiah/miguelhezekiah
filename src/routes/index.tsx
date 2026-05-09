@@ -1,7 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { HeroRotator } from "@/components/site/HeroRotator";
 import { useProjects } from "@/lib/portfolio";
 import { siteConfig } from "@/config/site";
+import { AboutSection } from "@/components/site/AboutSection";
+import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,8 +21,23 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { data: projects = [] } = useProjects();
   return (
-    <main className="relative min-h-dvh">
-      <HeroRotator projects={projects} />
+    <main className="relative">
+      {/* Full-viewport hero */}
+      <section className="relative h-[100dvh] w-full overflow-hidden">
+        <HeroRotator projects={projects} />
+        <Link
+          to="/"
+          hash="about"
+          className="absolute bottom-24 left-1/2 -translate-x-1/2 label label-muted z-20 flex flex-col items-center gap-2 hover:opacity-100 opacity-70 transition-opacity"
+        >
+          <span>scroll</span>
+          <span className="block h-6 w-px bg-current" />
+        </Link>
+      </section>
+
+      <div id="about" />
+      <AboutSection />
+      <Footer />
     </main>
   );
 }
