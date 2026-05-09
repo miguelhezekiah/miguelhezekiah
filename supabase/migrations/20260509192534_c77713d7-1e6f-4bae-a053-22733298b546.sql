@@ -1,0 +1,1 @@
+drop policy if exists "public read portfolio-assets" on storage.objects;
