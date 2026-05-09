@@ -60,15 +60,24 @@
   --destructive: oklch(0.62 0.22 22);
   --destructive-foreground: var(--foreground);
 
-  /* Typography stacks — load via root <head> */
-  --font-sans-stack: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
-  --font-display-stack: "Fraunces", "Inter Tight", ui-serif, Georgia, serif;
+  /* Typography — Helvetica everywhere, one family, one stack */
+  --font-sans-stack: "Helvetica Neue", Helvetica, Arial, "Inter", system-ui, sans-serif;
+  --font-display-stack: var(--font-sans-stack);
 
   /* Layout tokens */
-  --site-padding-x: clamp(1rem, 4vw, 2.5rem);
-  --site-padding-y: clamp(1rem, 3vh, 1.5rem);
-  --label-size: 0.6875rem; /* 11px corner labels */
+  --site-padding-x: clamp(16px, 2vw, 24px);
+  --site-padding-y: clamp(16px, 2.4vh, 28px);
+  --grid-gap: clamp(12px, 1.4vw, 16px);
+  --grid-cols: 6;
+  --section-gap: clamp(96px, 14vh, 180px);
+  --label-size: 0.6875rem;
   --label-tracking: 0.06em;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --grid-cols: 12;
+  }
 }
 
 @layer base {
@@ -90,7 +99,6 @@
     min-height: 100dvh;
   }
 
-  /* Hide native cursor on pointer devices when custom cursor is enabled */
   @media (hover: hover) and (pointer: fine) {
     body[data-cursor="on"] {
       cursor: none;
@@ -117,7 +125,7 @@
     font-size: var(--label-size);
     letter-spacing: var(--label-tracking);
     text-transform: uppercase;
-    font-weight: 400;
+    font-weight: 500;
   }
   .label-muted {
     color: var(--color-muted-foreground);
@@ -126,6 +134,44 @@
     font-family: var(--font-display);
     font-weight: 300;
     letter-spacing: -0.02em;
-    line-height: 0.95;
+    line-height: 0.98;
+  }
+
+  /* ===== Grid system =====
+     Every page wraps content in .page-grid. Children declare span via
+     .col-span-{n} (1..12). On mobile, the grid drops to 6 columns; spans
+     greater than 6 clamp to full row (handled inline via responsive classes). */
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gap);
+    row-gap: var(--grid-gap);
+    padding: calc(var(--site-padding-y) * 4) var(--site-padding-x);
+    width: 100%;
+  }
+  .col-span-full { grid-column: 1 / -1; }
+
+  /* Debug overlay */
+  .grid-debug {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+    column-gap: var(--grid-gap);
+    padding: 0 var(--site-padding-x);
+  }
+  .grid-debug > span {
+    background: color-mix(in oklab, var(--color-foreground) 6%, transparent);
+    border-left: 1px dashed color-mix(in oklab, var(--color-foreground) 18%, transparent);
+    border-right: 1px dashed color-mix(in oklab, var(--color-foreground) 18%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
   }
 }

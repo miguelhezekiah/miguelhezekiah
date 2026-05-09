@@ -3,15 +3,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import { motionConfig } from "@/config/site";
 import type { ReactNode } from "react";
 
+/** Subtle horizontal sweep. Outgoing slides left + fades; incoming slides in from right. */
 export function PageTransition({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
+  const d = motionConfig.pageSweepDistance;
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -8 }}
+        initial={{ opacity: 0, x: d }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -d }}
         transition={{ duration: motionConfig.pageDuration, ease: motionConfig.ease }}
       >
         {children}
