@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadAsset } from "@/lib/portfolio";
@@ -12,34 +12,54 @@ type Tab = "projects" | "writing" | "experience" | "now";
 
 function AdminPage() {
   const nav = useNavigate();
-  const [userId, setUserId] = useState<string | null | undefined>(undefined);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("projects");
 
   useEffect(() => {
+    let mounted = true;
     const sub = supabase.auth.onAuthStateChange((_e, session) => {
+      if (!mounted) return;
       setUserId(session?.user?.id ?? null);
+      setAuthReady(true);
     });
-    supabase.auth.getSession().then(({ data }) => setUserId(data.session?.user?.id ?? null));
-    return () => sub.data.subscription.unsubscribe();
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setUserId(data.session?.user?.id ?? null);
+      setAuthReady(true);
+    });
+    return () => {
+      mounted = false;
+      sub.data.subscription.unsubscribe();
+    };
   }, []);
 
-  useEffect(() => {
-    if (userId === undefined) return;
-    if (!userId) {
-      nav({ to: "/admin/login" });
-      return;
-    }
-    supabase
-      .from("admins")
-      .select("user_id")
-      .eq("user_id", userId)
-      .maybeSingle()
-      .then(({ data }) => setIsAdmin(!!data));
-  }, [userId, nav]);
+  const { data: isAdmin, isLoading: adminLoading } = useQuery({
+    queryKey: ["isAdmin", userId],
+    enabled: authReady && !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("admins")
+        .select("user_id")
+        .eq("user_id", userId!)
+        .maybeSingle();
+      if (error) {
+        console.error("admin check failed", error);
+        return false;
+      }
+      return !!data;
+    },
+  });
 
-  if (userId === undefined || isAdmin === null) {
+  useEffect(() => {
+    if (authReady && !userId) nav({ to: "/admin/login" });
+  }, [authReady, userId, nav]);
+
+  if (!authReady || (userId && adminLoading)) {
     return <main className="min-h-dvh flex items-center justify-center label label-muted">Loading…</main>;
+  }
+  if (!userId) {
+    return <main className="min-h-dvh flex items-center justify-center label label-muted">Redirecting…</main>;
   }
   if (!isAdmin) {
     return (
