@@ -37,7 +37,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       <div className="max-w-md text-center">
         <div className="label label-muted">Error</div>
         <h1 className="display mt-4 text-3xl">Something broke quietly.</h1>
-        <p className="mt-4 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          {import.meta.env.DEV ? error.message : "An unexpected error occurred."}
+        </p>
         <button
           onClick={() => {
             router.invalidate();
