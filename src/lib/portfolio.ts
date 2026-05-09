@@ -39,6 +39,15 @@ export type Experience = {
   sort_order: number;
 };
 
+export type NowItem = {
+  id: string;
+  kind: string;
+  title: string;
+  author: string | null;
+  note: string;
+  sort_order: number;
+};
+
 export function useProjects() {
   return useQuery({
     queryKey: ["projects"],
@@ -116,8 +125,23 @@ export function useExperience() {
   });
 }
 
+export function useNowItems() {
+  return useQuery({
+    queryKey: ["now_items"],
+    queryFn: async (): Promise<NowItem[]> => {
+      const { data, error } = await supabase
+        .from("now_items")
+        .select("*")
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as unknown as NowItem[];
+    },
+    staleTime: 60_000,
+  });
+}
+
 // Deterministic dark gradient placeholder per slug — same dimensions as a
-// real hero image, swapped out by editing hero_image_url in the dashboard.
+// real hero image, swapped out by editing hero_image_url in the admin page.
 export function placeholderFor(slug: string): string {
   let h = 0;
   for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0;
@@ -140,4 +164,15 @@ export function placeholderFor(slug: string): string {
 
 export function heroFor(p: { slug: string; hero_image_url: string | null }) {
   return p.hero_image_url || placeholderFor(p.slug);
+}
+
+export async function uploadAsset(table: string, slug: string, file: File): Promise<string> {
+  const ext = file.name.split(".").pop() ?? "bin";
+  const path = `${table}/${slug}-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage
+    .from("portfolio-assets")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (error) throw error;
+  const { data } = supabase.storage.from("portfolio-assets").getPublicUrl(path);
+  return data.publicUrl;
 }
