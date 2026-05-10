@@ -297,6 +297,70 @@ function RecordEditor<T extends { id: string; [k: string]: any }>(props: {
                   </div>
                 );
               }
+              if (f.type === "gallery") {
+                const urls: string[] = Array.isArray(val) ? val : [];
+                return (
+                  <div key={f.key} className="space-y-2">
+                    <label className="label label-muted">{f.label}</label>
+                    {urls.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {urls.map((u, i) => (
+                          <div key={i} className="relative">
+                            <img src={u} alt="" className="h-20 w-20 object-cover border border-border" />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditing({ ...editing, [f.key]: urls.filter((_, j) => j !== i) })
+                              }
+                              className="absolute -top-2 -right-2 bg-background border border-border rounded-full w-5 h-5 text-xs"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => e.target.files && onGalleryUpload(f.key, e.target.files)}
+                      className="text-xs"
+                    />
+                  </div>
+                );
+              }
+              if (f.type === "json") {
+                const text = typeof val === "string" ? val : JSON.stringify(val ?? [], null, 2);
+                return (
+                  <div key={f.key} className="space-y-2">
+                    <label className="label label-muted">{f.label} (JSON)</label>
+                    <textarea
+                      value={text}
+                      onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
+                      rows={6}
+                      className="w-full bg-background border border-border px-3 py-2 text-xs font-mono"
+                    />
+                  </div>
+                );
+              }
+              if (f.type === "select") {
+                return (
+                  <div key={f.key} className="space-y-2">
+                    <label className="label label-muted">{f.label}</label>
+                    <select
+                      value={val}
+                      onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
+                      className="w-full bg-background border border-border px-3 py-2 text-sm"
+                    >
+                      <option value=""></option>
+                      {f.options?.map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              }
               return (
                 <div key={f.key} className="space-y-2">
                   <label className="label label-muted">{f.label}</label>
