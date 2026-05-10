@@ -7,11 +7,18 @@ import { useProjects, heroFor, type Project } from "@/lib/portfolio";
 import { motionConfig, siteConfig } from "@/config/site";
 import { PageGrid } from "@/components/site/PageGrid";
 import { Footer } from "@/components/site/Footer";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const workSearchSchema = z.object({
   view: fallback(z.enum(["grid", "list"]), "grid").default("grid"),
   sort: fallback(z.enum(["year-desc", "year-asc", "alpha", "type"]), "year-desc").default("year-desc"),
-  cat: fallback(z.array(z.string()), []).default([]),
+  cat: fallback(z.string(), "all").default("all"),
   tag: fallback(z.array(z.string()), []).default([]),
 });
 
@@ -47,7 +54,7 @@ function WorkIndex() {
   const filtered = useMemo(() => {
     let xs = projects.filter(
       (p) =>
-        (cat.length === 0 || cat.includes(p.category)) &&
+        (cat === "all" || p.category === cat) &&
         (tag.length === 0 || tag.some((t: string) => p.tags.includes(t))),
     );
     xs = [...xs].sort((a, b) => {
@@ -61,21 +68,21 @@ function WorkIndex() {
     return xs;
   }, [projects, cat, tag, sort]);
 
-  const toggle = (key: "cat" | "tag", val: string) =>
+  const toggleTag = (val: string) =>
     navigate({
       search: (prev: any) => {
-        const cur = (prev as any)[key] as string[];
+        const cur = prev.tag as string[];
         const next = cur.includes(val) ? cur.filter((x) => x !== val) : [...cur, val];
-        return { ...prev, [key]: next };
+        return { ...prev, tag: next };
       },
     });
 
-  const hasFilter = cat.length > 0 || tag.length > 0;
+  const hasFilter = cat !== "all" || tag.length > 0;
 
   return (
     <main className="pt-24">
       <PageGrid>
-        <div className="col-span-full flex items-end justify-between mb-8">
+        <div className="col-span-full flex items-end justify-between mb-8 flex-wrap gap-4">
           <div>
             <div className="label label-muted mb-2">Work</div>
             <h1 className="display text-[clamp(2rem,5vw,4rem)]">
@@ -85,8 +92,9 @@ function WorkIndex() {
         </div>
 
         {/* Toolbar */}
-        <div className="col-span-full flex flex-wrap items-center gap-x-8 gap-y-4 border-y border-border py-5 sticky top-0 bg-background/85 backdrop-blur z-30">
-          <ToolbarGroup label="View">
+        <div className="col-span-full flex flex-wrap items-center gap-x-6 gap-y-4 border-y border-border py-5 sticky top-0 bg-background/85 backdrop-blur z-30">
+          <div className="flex items-center gap-3">
+            <span className="label label-muted">View</span>
             {(["grid", "list"] as const).map((v) => (
               <button
                 key={v}
@@ -96,56 +104,55 @@ function WorkIndex() {
                 {v}
               </button>
             ))}
-          </ToolbarGroup>
+          </div>
 
-          <ToolbarGroup label="Sort">
-            {(
-              [
-                ["year-desc", "Year ↓"],
-                ["year-asc", "Year ↑"],
-                ["alpha", "A–Z"],
-                ["type", "Type"],
-              ] as const
-            ).map(([k, lbl]) => (
-              <button
-                key={k}
-                onClick={() => navigate({ search: (p: any) => ({ ...p, sort: k }) })}
-                className={`label transition-opacity ${sort === k ? "opacity-100 underline underline-offset-4" : "opacity-50 hover:opacity-100"}`}
-              >
-                {lbl}
-              </button>
-            ))}
-          </ToolbarGroup>
+          <div className="flex items-center gap-3">
+            <span className="label label-muted">Sort</span>
+            <Select value={sort} onValueChange={(v) => navigate({ search: (p: any) => ({ ...p, sort: v }) })}>
+              <SelectTrigger className="h-8 w-[140px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="year-desc">Year ↓</SelectItem>
+                <SelectItem value="year-asc">Year ↑</SelectItem>
+                <SelectItem value="alpha">A–Z</SelectItem>
+                <SelectItem value="type">Type</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-          <ToolbarGroup label="Type">
-            {categories.map((c) => (
-              <button
-                key={c}
-                onClick={() => toggle("cat", c)}
-                className={`label transition-opacity ${cat.includes(c) ? "opacity-100 underline underline-offset-4" : "opacity-50 hover:opacity-100"}`}
-              >
-                {c}
-              </button>
-            ))}
-          </ToolbarGroup>
+          <div className="flex items-center gap-3">
+            <span className="label label-muted">Type</span>
+            <Select value={cat} onValueChange={(v) => navigate({ search: (p: any) => ({ ...p, cat: v }) })}>
+              <SelectTrigger className="h-8 w-[160px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {categories.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {tags.length > 0 && (
-            <ToolbarGroup label="Tag">
+            <div className="flex flex-wrap items-center gap-3">
               {tags.map((t) => (
                 <button
                   key={t}
-                  onClick={() => toggle("tag", t)}
+                  onClick={() => toggleTag(t)}
                   className={`label transition-opacity ${tag.includes(t) ? "opacity-100 underline underline-offset-4" : "opacity-50 hover:opacity-100"}`}
                 >
                   {t}
                 </button>
               ))}
-            </ToolbarGroup>
+            </div>
           )}
 
           {hasFilter && (
             <button
-              onClick={() => navigate({ search: (p: any) => ({ ...p, cat: [], tag: [] }) })}
+              onClick={() => navigate({ search: (p: any) => ({ ...p, cat: "all", tag: [] }) })}
               className="label opacity-60 hover:opacity-100 ml-auto"
             >
               Clear ✕
@@ -171,15 +178,6 @@ function WorkIndex() {
       </PageGrid>
       <Footer />
     </main>
-  );
-}
-
-function ToolbarGroup({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="label label-muted">{label}</span>
-      <div className="flex flex-wrap items-center gap-3">{children}</div>
-    </div>
   );
 }
 
@@ -229,7 +227,7 @@ function ListView({ items }: { items: Project[] }) {
                 className="group flex items-baseline justify-between py-7"
               >
                 <motion.span
-                  className="display text-3xl md:text-5xl"
+                  className="display text-2xl md:text-5xl"
                   animate={{
                     x: hovered?.id === p.id ? 12 : 0,
                     opacity: hovered && hovered.id !== p.id ? 0.35 : 1,
