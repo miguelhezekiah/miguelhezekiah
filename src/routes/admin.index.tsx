@@ -184,6 +184,23 @@ function RecordEditor<T extends { id: string; [k: string]: any }>(props: {
       setBusy(false);
     }
   }
+  async function onGalleryUpload(field: string, files: FileList) {
+    if (!editing) return;
+    const slug = String((slugKey && editing[slugKey]) || `tmp-${Date.now()}`);
+    setBusy(true);
+    try {
+      const existing: string[] = Array.isArray((editing as any)[field]) ? (editing as any)[field] : [];
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        uploaded.push(await uploadAsset(table, `${slug}-${Date.now()}-${file.name}`, file));
+      }
+      setEditing({ ...editing, [field]: [...existing, ...uploaded] } as Partial<T>);
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
