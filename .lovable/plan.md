@@ -1,12 +1,17 @@
-## Plan
+## Root cause
 
-1. Update `src/routes/admin.tsx` so auth restoration has an explicit `authReady` state instead of using `userId === undefined` as the loading sentinel.
-2. Replace the manual `isAdmin` state/effect with a gated React Query admin check that only runs after auth is ready and a user exists.
-3. Make redirects happen only after auth is ready, so unauthenticated users go to `/admin/login`, non-admin users see “Not authorized,” and valid admins see the editor instead of an endless loading screen.
-4. Add basic error handling for the admin lookup so failed checks don’t leave the page stuck on Loading.
+With TanStack Router's dot-naming, `admin.tsx` (route `/admin`) becomes the parent layout of `admin.login.tsx` (route `/admin/login`). `admin.tsx` does not render an `<Outlet />`, so when redirecting to `/admin/login` the parent admin component keeps rendering its own UI ("Redirecting…") and the login form never appears. That's why the screen is stuck even though the URL flips to `/admin/login`.
 
-## Technical notes
+## Fix
 
-- Keep the current admin security model: no public signup, admin access remains controlled by the `admins` table.
-- No database changes are needed.
-- Only `src/routes/admin.tsx` should need changes.
+1. Rename `src/routes/admin.tsx` to `src/routes/admin.index.tsx` so `/admin` is a leaf route, not a parent layout. `admin.login.tsx` then resolves independently and the login form actually renders.
+2. Leave `admin.login.tsx` as-is.
+3. Verify in the preview:
+   - Visiting `/admin` while signed out redirects to `/admin/login` and shows the email/password form.
+   - Signing in with the existing admin account lands on `/admin` and shows the editor tabs.
+   - Signing out from `/admin` returns to `/admin/login`.
+
+## Notes
+
+- No DB changes. No auth changes. Pure routing fix.
+- `src/routeTree.gen.ts` regenerates automatically; do not edit it.
