@@ -13,7 +13,6 @@ export const siteConfig = {
   },
   // 4-section nav. Index (/) is reachable via the name in the top-left.
   nav: [
-    { label: "About", to: "/about" },
     { label: "Work", to: "/work" },
     { label: "Thinking", to: "/thinking" },
     { label: "Contact", to: "/contact" },
