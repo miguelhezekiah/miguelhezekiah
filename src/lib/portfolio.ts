@@ -36,6 +36,7 @@ export type Experience = {
   org: string;
   years: string;
   note: string;
+  image_url: string | null;
   sort_order: number;
 };
 
