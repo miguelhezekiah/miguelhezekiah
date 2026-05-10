@@ -498,8 +498,8 @@ function TimelineTab() {
       rows={data}
       defaults={{ kind:"project", lane:"academic", label:"", start_year:2024, end_year:null, page_ref:"", sort_order:0 }}
       fields={[
-        { key: "kind", label: "Kind (project / skill / lane_label)" },
-        { key: "lane", label: "Lane (academic / professional / personal)" },
+        { key: "kind", label: "Kind", type: "select", options: ["project", "skill", "lane_label"] },
+        { key: "lane", label: "Lane", type: "select", options: ["academic", "professional", "personal"] },
         { key: "label", label: "Label" },
         { key: "start_year", label: "Start year", type: "number" },
         { key: "end_year", label: "End year (blank = present)", type: "number" },
