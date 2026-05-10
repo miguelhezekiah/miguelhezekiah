@@ -119,7 +119,8 @@ function AdminPage() {
 type Field = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "image" | "list";
+  type?: "text" | "textarea" | "number" | "image" | "list" | "gallery" | "json" | "select";
+  options?: string[];
 };
 
 function RecordEditor<T extends { id: string; [k: string]: any }>(props: {
