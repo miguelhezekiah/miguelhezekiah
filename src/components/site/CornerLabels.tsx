@@ -21,15 +21,17 @@ export function CornerLabels() {
 
   return (
     <header className="pointer-events-none fixed inset-0 z-40">
-      {/* Wordmark — top left */}
-      <div
+      {/* Wordmark — top left (hides on scroll-down like nav) */}
+      <motion.div
+        animate={{ y: navHidden ? -40 : 0, opacity: navHidden ? 0 : 1 }}
+        transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
         className="pointer-events-auto absolute top-0 left-0 label"
         style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
       >
         <Link to="/" className="hover:opacity-60 transition-opacity duration-500">
           {siteConfig.name}
         </Link>
-      </div>
+      </motion.div>
 
       {/* Nav — top right (hides on scroll-down) */}
       <motion.nav
