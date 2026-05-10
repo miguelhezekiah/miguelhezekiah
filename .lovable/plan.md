@@ -1,130 +1,92 @@
+## 1. Timeline graphic — pixel-perfect match to reference
 
-## Overview
+Rewrite `src/components/site/TimelineGraphic.tsx` so the SVG layout mirrors the uploaded image exactly.
 
-Nine changes across navigation, home page, project/essay detail pages, admin, and a new editable timeline graphic. Below is grouped by area, then numbered by your original list at the end.
+**Layout (desktop SVG, viewBox 1600×1000):**
 
----
+```text
+                                  [Personal Projects]
+                                                          ┌──────────────────┐         ┌──────────────┐
+                                                          │ 06. Facade Opt   │         │ 05. Hangar   │
+                                                          └────────┬─────────┘         └──────┬───────┘
+            [Professional]                                         │                          │
+                                  ┌──────────────┐    ┌────────────┴─────┐                    │
+                                  │ 03. Internship│   │ 04. Interiors    │                    │
+                                  └──────┬───────┘    └─────────┬────────┘                    │
+[Academic]                               │                      │                             │
+       ┌──────────────┐  ┌──────────────────┐                   │                             │
+       │ 01. House…   │  │ 02. Sculpted…    │                   │                             │
+       └────┬─────────┘  └────────┬─────────┘                   │                             │
+            \\dashed              \\dashed                       │                             │
+        ── bar ──             ── bar ──                    ── bar ── ── bar ──             ── bar ──
+   ──+──────+──────+──────+──────+──────+──────+─────⇢
+     2021   2022   2023   2024   2025   2026  Present
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━            ╭────────────────╮
+              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━              │ Design Systems │
+                  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━              │ & Automation   │
+                                  ━━━━━━━━━━━━━━━━━              ╰────────────────╯
+                                            ━━━━━━━━━              ╭────────────────╮
+                                            ━━━━━━━━━              │ LoRA + ControlNet│
+                                                                   ╰────────────────╯
+   AutoCAD  Revit  Rhino+GH  Render  C#/Python                    [Learning in progress]
+                  Rhino.Inside.Revit          (skill chips below bars)
+                  [BIM] [Parametric]    [Computational]
+```
 
-## 1. Routing & nav cleanup (items #1, #3, #9)
+**Hard-coded positions** matching the reference, derived from the data row's `start_year` so admin still drives content:
 
-- Delete `src/routes/about.tsx`. The `/about` URL will 404 to the global not-found.
-- Remove the "About" entry from `siteConfig.nav`. Nav becomes: Work, Thinking, Contact (3 items). Index counter logic in `IndexCounter` keeps working.
-- The Index page already renders `AboutSection` + `Footer` after the hero, so no content is lost.
-- `CornerLabels` chrome rework:
-  - Top-right nav: hide on scroll-down, reveal on scroll-up (and always visible at the very top). Implemented with a small scroll-direction hook (`useScrollDirection`) wired to a translate-Y + opacity transition on the nav row only.
-  - Top-left wordmark, bottom-right meta: stay fixed/absolute as today.
-  - Bottom-left section + index counter: when the footer enters the viewport, fade these out at the fixed position and render the same labels inside the footer's top-left cell instead. Detect with `IntersectionObserver` on the footer.
-- `Footer` rework: no text in the bottom-left cell anymore. Layout becomes:
-  - Top-left of footer: section name + index counter (handed off from CornerLabels when in view).
-  - Center: email link.
-  - Right: socials (Instagram, LinkedIn, GitHub).
-  - Copyright moves to a thin row at the bottom-center or bottom-right (kept on a single line on mobile).
+- 3 lanes stacked vertically above axis with italic bracket labels at left margin (`[Academic]`, `[Professional]`, `[Personal Projects]`).
+- Pills (black bg, white text, page-ref in muted white) sit ABOVE their lane row, connected by a thin dashed leader line down to a short solid bar that touches the axis.
+- Multiple pills in same year on same lane stack vertically (e.g. Interiors above its bar at 2025).
+- Axis: horizontal line with `+` tick marks at each year, year labels below, dashed extension to `→` arrow on the right ending past "Present".
+- Skill bars: thick solid horizontal lines BELOW the axis, each on its own row, starting at the skill's `start_year` and extending to `end_year` (or to "Present" if null). Below each bar's start a dashed drop-line connects to a rounded skill chip with the skill name. Below some chips, a small italic bracket category (`[BIM]`, `[Parametric]`, `[Computational]`).
+- "Learning in progress" cluster: rounded chips on the FAR RIGHT, past Present, with italic `[Learning in progress]` label underneath.
 
-## 2. Home page additions (item #2 — animated timeline)
+**Animation (once on scroll-into-view):**
+- Axis line draws left → right (1.4s ease).
+- For each year as the sweep crosses it: tick `+` fades in, year label fades in.
+- Each pill/bar appears when the sweep reaches its start year (bar draws first, then pill drops in from above with dashed leader).
+- Skill bars animate as horizontal draws starting at their `start_year`, duration proportional to span.
+- Learning cluster fades in last.
 
-- New section `TimelineGraphic` inserted in the home page between the bio paragraphs and the Experience list inside `AboutSection`.
-- Visuals follow the reference image you uploaded:
-  - Horizontal axis with `+` ticks for 2021 → 2026 → Present.
-  - Three lanes above the axis: `[Academic]`, `[Professional]`, `[Personal Projects]`. Each project is a black pill (e.g. "01. House of Slabs") connected to its year by a dashed leader line.
-  - Below the axis: skill bars (AutoCAD, Revit, Rhino + Grasshopper, Rhino.Inside.Revit, Rendering Softwares, C# RhinoCommon, Python) drawn as horizontal lines starting at the year the skill was adopted and extending to "Present".
-  - "Learning in progress" cluster on the right (Design Systems & Automation, LoRA + ControlNet).
-- Animation (plays once on scroll-into-view via `IntersectionObserver` + Framer Motion):
-  1. Axis line draws left → right (~1.2s).
-  2. As the "loading" point passes each year tick, that year label fades in.
-  3. Project pills + their leader lines fade/draw in when the loader passes their year.
-  4. Skill lines extend from their start year toward Present, in sync with the same loader sweep, so a skill that starts at 2023 begins drawing only when the loader reaches 2023.
-  5. Text labels (lane titles, "Learning in progress") fade in last.
-- Built with inline SVG (axis, lines, pills) wrapped in `motion.svg`. Uses `pathLength` animations for the lines and `opacity` for labels. Respects `prefers-reduced-motion` (renders the final state immediately).
-- Responsive: at viewports <768px, the graphic switches from horizontal to a vertical stacked timeline (axis becomes top→bottom, project pills stack on the right, skill bars stack below). Same animation behavior.
+**Mobile (<md):** keep current vertical stacked timeline (no change to fidelity needed).
 
-## 3. Timeline data — new editable table (item #2 data layer)
+**DB seed update** (migration to update existing rows so labels, years, page refs, lanes match the image exactly):
+- 01 House of Slabs · academic · 2022 · p.03
+- 02 Sculpted Earth House · academic · 2023 · p.07
+- 03 Internship · professional · 2024 · p.11
+- 04 Interiors · professional · 2025 · p.12
+- 05 Hangar · personal · 2026 · p.13
+- 06 Facade Optimization · personal · 2025 · p.15
+- Skills: AutoCAD (2021–present), Revit (2022–present, [BIM]), Rhino+Grasshopper (2023–present, [Parametric]), Rhino.Inside.Revit (2023–present, [Parametric]), Rendering Softwares (2025–present), C# RhinoCommon (2026–present, [Computational]), Python (2026–present, [Computational])
+- Learning: Design Systems & Automation, LoRA + ControlNet
 
-New `timeline_entries` table:
-- `id` uuid pk
-- `kind` text ('project' | 'skill' | 'lane_label')
-- `lane` text ('academic' | 'professional' | 'personal' | null) — for projects only
-- `label` text — pill/skill text
-- `start_year` integer — required
-- `end_year` integer | null — null means "Present" (skills); for projects defaults to start_year
-- `page_ref` text | null — e.g. "p.03"
-- `sort_order` integer
+## 2. Wordmark scroll behavior
 
-Standard RLS: public read, admin write (mirrors `experience`). Seeded with the entries from your reference image.
+In `src/components/site/CornerLabels.tsx`, wrap the top-left wordmark `<Link>` in the same `motion.div` pattern as the top-right nav, using the existing `navHidden` value (`!atTop && direction === "down"`). No footer handoff. Symmetric animation: `y: -40, opacity: 0` on hide.
 
-Admin page gains a "Timeline" tab with the same edit/add/delete pattern as Experience.
+## 3. Admin CMS — fill missing CRUD
 
-## 4. Detail pages — fix routing + redesign (item #5)
+Audit results vs DB schema:
 
-Investigation already done: routes `/work/$slug` and `/thinking/$slug` exist and the projects exist in the DB. The 404 is most likely the same trailing-slash router config that previously broke `/admin`. Fix it once at the router level and verify both detail routes load.
+| Table | Missing in admin |
+|---|---|
+| `projects` | `gallery_urls` (multi-image upload), `metrics` (jsonb editor) |
+| `experience` | (complete) |
+| `writing` | (complete) |
+| `timeline_entries` | dropdowns for `kind` and `lane` instead of free-text |
+| `now_items` | (complete) |
 
-Then redesign:
+Changes to `src/routes/admin.index.tsx`:
 
-- **`/work/$slug`** (editorial layout):
-  - Full-bleed hero image with title overlaid bottom-left.
-  - Two-column intro: left = sticky meta block (year, role, location, category, tags), right = summary in display type, then long-form body paragraphs.
-  - Metrics row in a thin border-y band.
-  - Gallery as an asymmetric mosaic (1-up, then 2-up, then 1-up) instead of a uniform 2-col grid.
-  - Sticky "Next project →" footer card with hero thumbnail.
-- **`/thinking/$slug`** (long-read layout):
-  - Centered max-w-prose column, large display title, drop-cap on first paragraph.
-  - Sticky meta column on the left at md+ (date · tag · read time).
-  - Footer block with "← All writing" and a "Next essay" link.
+- Extend `RecordEditor`'s `Field.type` with `"gallery"` (multi-upload, array of URLs with previews + remove buttons) and `"json"` (textarea that parses to JSON, used for metrics — already half-supported, just expose it as a field type).
+- Add `"select"` field type with `options: string[]`.
+- `ProjectsTab`: add `gallery_urls` (gallery), `metrics` (json) fields.
+- `TimelineTab`: change `kind` and `lane` to `select` with the enum options.
+- All saves already invalidate React Query; public pages refetch on next mount. Verify no stale-cache issues.
 
-## 5. Experience section update (item #6)
+## Files
 
-- Add `image_url` text column (nullable) to `experience`.
-- Layout in `AboutSection` changes from a 3-column row (years | role+org | note) to a 2-row block per entry:
-  - Row 1 (existing): years | role + org | note (kept).
-  - Row 2 (new): a wide image area spanning the columns under role+org+note (years stays empty in row 2). Always renders — falls back to the same gradient placeholder used elsewhere when `image_url` is null.
-  - On mobile the image stacks below the text.
-- Admin "Experience" tab gains an image upload field (uses existing `uploadAsset` helper + `portfolio-assets` bucket).
-
-## 6. Work toolbar polish (item #7)
-
-In `src/routes/work.tsx`:
-- Replace the inline `Sort` button row with a shadcn `Select` dropdown (Year ↓ / Year ↑ / A–Z / Type).
-- Replace the inline `Type` button row with a shadcn `Select` (single-select; "All" + each category).
-- Tags: drop the "Tag" group label; render the tag chips inline as a horizontal row (still toggleable, multi-select).
-- Toolbar wraps cleanly at mobile widths (the View / Sort / Type selects stack into 2 rows).
-
-## 7. Responsiveness pass (item #8)
-
-While touching each affected file, verify and adjust at 360 / 414 / 768 / 1024 / 1440:
-- Home hero, AboutSection bio + new timeline + experience.
-- Footer (handoff of corner labels works on mobile too — labels move into footer, no overlap with email/socials).
-- Work toolbar (selects + tag chips wrap, no horizontal scroll).
-- Work detail hero + asymmetric gallery (mosaic collapses to single column).
-- Thinking detail (sticky meta hides at <md, becomes a top header).
-- CornerLabels: at <640px, hide the bottom-right meta block and shorten labels to avoid overlap with corner padding.
-
-## 8. Images (item #4)
-
-You said you'll upload them in this chat. The plan assumes you'll attach images for each of the 4 projects + experience entries before I run the changes that need them. Build flow:
-1. You drop the image files into chat with a short note mapping each file to a project slug and experience role.
-2. I copy them into the `portfolio-assets` storage bucket and update `projects.hero_image_url` / `experience.image_url` rows.
-3. Detail pages and AboutSection then pick them up automatically.
-
-If any images are missing at build time, those entries fall back to the existing gradient placeholder so nothing breaks.
-
----
-
-## Technical notes
-
-- New file: `src/components/site/TimelineGraphic.tsx` (SVG + Framer Motion).
-- New file: `src/hooks/useScrollDirection.ts`.
-- New file: `src/components/site/AdminTimeline.tsx` (admin tab).
-- Modified: `src/config/site.ts` (drop About from nav), `src/routes/index.tsx` (insert TimelineGraphic), `src/components/site/AboutSection.tsx` (new experience layout + insert TimelineGraphic between bio and experience), `src/components/site/CornerLabels.tsx` (scroll-aware nav + footer handoff), `src/components/site/Footer.tsx` (new layout), `src/routes/work.tsx` (Select dropdowns), `src/routes/work.$slug.tsx` (redesign), `src/routes/thinking.$slug.tsx` (redesign), `src/routes/admin.index.tsx` (Timeline tab + experience image field), `src/lib/portfolio.ts` (queries + types for timeline + experience image), `src/router.tsx` (trailing-slash fix if confirmed).
-- Deleted: `src/routes/about.tsx`.
-- DB migrations: create `timeline_entries` + RLS, add `image_url` to `experience`, seed `timeline_entries` from the reference image.
-
-## Mapping back to your numbered list
-
-1. Erase /about + nav link → §1.
-2. Animated timeline graphic → §2 + §3.
-3. Absolute nav (hide on scroll-down) + footer chrome handoff → §1.
-4. Replace placeholders with uploaded images → §8 (waiting on your uploads).
-5. Project + essay pages working and redesigned → §4.
-6. Experience image spanning role/org/note → §5.
-7. Sort + Type as Selects, drop "Tag" label → §6.
-8. Responsivity → §7.
-9. Pointer-event chrome updated; footer left side empty until scrolled-to → §1.
+- **Edit:** `src/components/site/TimelineGraphic.tsx` (full rewrite for desktop SVG), `src/components/site/CornerLabels.tsx` (wordmark animation), `src/routes/admin.index.tsx` (new field types + ProjectsTab/TimelineTab updates).
+- **Migration:** UPDATE existing `timeline_entries` rows to match reference exactly (delete + reseed).
+- **No new files, no schema changes** (existing columns cover everything).
