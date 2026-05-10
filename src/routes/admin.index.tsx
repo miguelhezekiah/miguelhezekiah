@@ -144,6 +144,11 @@ function RecordEditor<T extends { id: string; [k: string]: any }>(props: {
     if (!editing) return;
     setBusy(true);
     const row: any = { ...editing };
+    for (const f of fields) {
+      if (f.type === "json" && typeof row[f.key] === "string") {
+        try { row[f.key] = JSON.parse(row[f.key] || "[]"); } catch { row[f.key] = []; }
+      }
+    }
     if ("metrics" in row && typeof row.metrics === "string") {
       try { row.metrics = JSON.parse(row.metrics); } catch { row.metrics = []; }
     }
