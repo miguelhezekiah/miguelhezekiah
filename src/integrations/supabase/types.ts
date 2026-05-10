@@ -33,6 +33,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          image_url: string | null
           note: string
           org: string
           role: string
@@ -42,6 +43,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          image_url?: string | null
           note: string
           org: string
           role: string
@@ -51,6 +53,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          image_url?: string | null
           note?: string
           org?: string
           role?: string
@@ -140,6 +143,42 @@ export type Database = {
           tags?: string[]
           title?: string
           year?: string
+        }
+        Relationships: []
+      }
+      timeline_entries: {
+        Row: {
+          created_at: string
+          end_year: number | null
+          id: string
+          kind: string
+          label: string
+          lane: string | null
+          page_ref: string | null
+          sort_order: number
+          start_year: number
+        }
+        Insert: {
+          created_at?: string
+          end_year?: number | null
+          id?: string
+          kind: string
+          label: string
+          lane?: string | null
+          page_ref?: string | null
+          sort_order?: number
+          start_year: number
+        }
+        Update: {
+          created_at?: string
+          end_year?: number | null
+          id?: string
+          kind?: string
+          label?: string
+          lane?: string | null
+          page_ref?: string | null
+          sort_order?: number
+          start_year?: number
         }
         Relationships: []
       }
