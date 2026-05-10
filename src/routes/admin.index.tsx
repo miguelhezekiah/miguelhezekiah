@@ -8,7 +8,7 @@ export const Route = createFileRoute("/admin/")({
   component: AdminPage,
 });
 
-type Tab = "projects" | "writing" | "experience" | "now";
+type Tab = "projects" | "writing" | "experience" | "now" | "timeline";
 
 function AdminPage() {
   const nav = useNavigate();
@@ -93,8 +93,8 @@ function AdminPage() {
         </div>
       </header>
 
-      <nav className="flex gap-6 border-b border-border pb-4 mb-8 label">
-        {(["projects", "writing", "experience", "now"] as Tab[]).map((t) => (
+      <nav className="flex flex-wrap gap-6 border-b border-border pb-4 mb-8 label">
+        {(["projects", "writing", "experience", "timeline", "now"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -108,6 +108,7 @@ function AdminPage() {
       {tab === "projects" && <ProjectsTab />}
       {tab === "writing" && <WritingTab />}
       {tab === "experience" && <ExperienceTab />}
+      {tab === "timeline" && <TimelineTab />}
       {tab === "now" && <NowTab />}
     </main>
   );
@@ -384,13 +385,36 @@ function ExperienceTab() {
     <RecordEditor
       table="experience"
       queryKey="experience"
+      imageKey="image_url"
       rows={data}
-      defaults={{ role:"", org:"", years:"", note:"", sort_order:0 }}
+      defaults={{ role:"", org:"", years:"", note:"", image_url:null, sort_order:0 }}
       fields={[
         { key: "role", label: "Role" },
         { key: "org", label: "Org" },
         { key: "years", label: "Years" },
         { key: "note", label: "Note", type: "textarea" },
+        { key: "image_url", label: "Image", type: "image" },
+        { key: "sort_order", label: "Sort order", type: "number" },
+      ]}
+    />
+  );
+}
+
+function TimelineTab() {
+  const { data = [] } = useTable<any>("timeline_entries", "timeline_entries");
+  return (
+    <RecordEditor
+      table="timeline_entries"
+      queryKey="timeline_entries"
+      rows={data}
+      defaults={{ kind:"project", lane:"academic", label:"", start_year:2024, end_year:null, page_ref:"", sort_order:0 }}
+      fields={[
+        { key: "kind", label: "Kind (project / skill / lane_label)" },
+        { key: "lane", label: "Lane (academic / professional / personal)" },
+        { key: "label", label: "Label" },
+        { key: "start_year", label: "Start year", type: "number" },
+        { key: "end_year", label: "End year (blank = present)", type: "number" },
+        { key: "page_ref", label: "Page ref / category" },
         { key: "sort_order", label: "Sort order", type: "number" },
       ]}
     />
