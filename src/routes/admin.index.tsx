@@ -437,6 +437,8 @@ function ProjectsTab() {
         { key: "body", label: "Body paragraphs", type: "list" },
         { key: "tags", label: "Tags", type: "list" },
         { key: "hero_image_url", label: "Hero image", type: "image" },
+        { key: "gallery_urls", label: "Gallery", type: "gallery" },
+        { key: "metrics", label: "Metrics", type: "json" },
         { key: "sort_order", label: "Sort order", type: "number" },
       ]}
     />
