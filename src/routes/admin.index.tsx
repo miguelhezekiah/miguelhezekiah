@@ -119,7 +119,8 @@ function AdminPage() {
 type Field = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "image" | "list";
+  type?: "text" | "textarea" | "number" | "image" | "list" | "gallery" | "json" | "select";
+  options?: string[];
 };
 
 function RecordEditor<T extends { id: string; [k: string]: any }>(props: {
@@ -143,6 +144,11 @@ function RecordEditor<T extends { id: string; [k: string]: any }>(props: {
     if (!editing) return;
     setBusy(true);
     const row: any = { ...editing };
+    for (const f of fields) {
+      if (f.type === "json" && typeof row[f.key] === "string") {
+        try { row[f.key] = JSON.parse(row[f.key] || "[]"); } catch { row[f.key] = []; }
+      }
+    }
     if ("metrics" in row && typeof row.metrics === "string") {
       try { row.metrics = JSON.parse(row.metrics); } catch { row.metrics = []; }
     }
@@ -172,6 +178,23 @@ function RecordEditor<T extends { id: string; [k: string]: any }>(props: {
     try {
       const url = await uploadAsset(table, slug, file);
       setEditing({ ...editing, [imageKey ?? "hero_image_url"]: url } as Partial<T>);
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function onGalleryUpload(field: string, files: FileList) {
+    if (!editing) return;
+    const slug = String((slugKey && editing[slugKey]) || `tmp-${Date.now()}`);
+    setBusy(true);
+    try {
+      const existing: string[] = Array.isArray((editing as any)[field]) ? (editing as any)[field] : [];
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        uploaded.push(await uploadAsset(table, `${slug}-${Date.now()}-${file.name}`, file));
+      }
+      setEditing({ ...editing, [field]: [...existing, ...uploaded] } as Partial<T>);
     } catch (e: any) {
       alert(e.message);
     } finally {
@@ -274,6 +297,70 @@ function RecordEditor<T extends { id: string; [k: string]: any }>(props: {
                   </div>
                 );
               }
+              if (f.type === "gallery") {
+                const urls: string[] = Array.isArray(val) ? val : [];
+                return (
+                  <div key={f.key} className="space-y-2">
+                    <label className="label label-muted">{f.label}</label>
+                    {urls.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {urls.map((u, i) => (
+                          <div key={i} className="relative">
+                            <img src={u} alt="" className="h-20 w-20 object-cover border border-border" />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditing({ ...editing, [f.key]: urls.filter((_, j) => j !== i) })
+                              }
+                              className="absolute -top-2 -right-2 bg-background border border-border rounded-full w-5 h-5 text-xs"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => e.target.files && onGalleryUpload(f.key, e.target.files)}
+                      className="text-xs"
+                    />
+                  </div>
+                );
+              }
+              if (f.type === "json") {
+                const text = typeof val === "string" ? val : JSON.stringify(val ?? [], null, 2);
+                return (
+                  <div key={f.key} className="space-y-2">
+                    <label className="label label-muted">{f.label} (JSON)</label>
+                    <textarea
+                      value={text}
+                      onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
+                      rows={6}
+                      className="w-full bg-background border border-border px-3 py-2 text-xs font-mono"
+                    />
+                  </div>
+                );
+              }
+              if (f.type === "select") {
+                return (
+                  <div key={f.key} className="space-y-2">
+                    <label className="label label-muted">{f.label}</label>
+                    <select
+                      value={val}
+                      onChange={(e) => setEditing({ ...editing, [f.key]: e.target.value })}
+                      className="w-full bg-background border border-border px-3 py-2 text-sm"
+                    >
+                      <option value=""></option>
+                      {f.options?.map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              }
               return (
                 <div key={f.key} className="space-y-2">
                   <label className="label label-muted">{f.label}</label>
@@ -350,6 +437,8 @@ function ProjectsTab() {
         { key: "body", label: "Body paragraphs", type: "list" },
         { key: "tags", label: "Tags", type: "list" },
         { key: "hero_image_url", label: "Hero image", type: "image" },
+        { key: "gallery_urls", label: "Gallery", type: "gallery" },
+        { key: "metrics", label: "Metrics", type: "json" },
         { key: "sort_order", label: "Sort order", type: "number" },
       ]}
     />
@@ -409,8 +498,8 @@ function TimelineTab() {
       rows={data}
       defaults={{ kind:"project", lane:"academic", label:"", start_year:2024, end_year:null, page_ref:"", sort_order:0 }}
       fields={[
-        { key: "kind", label: "Kind (project / skill / lane_label)" },
-        { key: "lane", label: "Lane (academic / professional / personal)" },
+        { key: "kind", label: "Kind", type: "select", options: ["project", "skill", "lane_label"] },
+        { key: "lane", label: "Lane", type: "select", options: ["academic", "professional", "personal"] },
         { key: "label", label: "Label" },
         { key: "start_year", label: "Start year", type: "number" },
         { key: "end_year", label: "End year (blank = present)", type: "number" },
