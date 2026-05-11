@@ -79,11 +79,11 @@ export function HeroRotator({ projects }: { projects: Project[] }) {
         );
       })}
 
-      {/* centered project label */}
+      {/* Swiss caption block — bottom-left, 12-col mini-grid */}
       <div className="relative z-10 flex h-full w-full items-end pointer-events-none">
         <div
           className="w-full pointer-events-auto"
-          style={{ padding: "calc(var(--site-padding-y) * 4) var(--site-padding-x)" }}
+          style={{ padding: "calc(var(--site-padding-y) * 5) var(--site-padding-x)" }}
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -92,21 +92,27 @@ export function HeroRotator({ projects }: { projects: Project[] }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.7, ease: motionConfig.ease }}
-              className="max-w-5xl"
+              className="grid grid-cols-12 gap-4 md:gap-6 items-end"
             >
-              <div className="label label-muted mb-4 flex flex-wrap gap-x-4 gap-y-1">
-                <span>{current.category}</span>
-                <span aria-hidden>·</span>
-                <span>{current.location}</span>
-                <span aria-hidden>·</span>
-                <span>{current.year}</span>
+              <div className="col-span-2 label label-muted num">
+                <span className="accent">{String(i + 1).padStart(2, "0")}</span>
+                <span className="opacity-40"> / {String(projects.length).padStart(2, "0")}</span>
               </div>
-              <Link to="/work/$slug" params={{ slug: current.slug }}>
-                <h1 className="display text-[clamp(2.5rem,7vw,6.5rem)]">{current.title}</h1>
-              </Link>
-              <p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                {current.summary}
-              </p>
+              <div className="col-span-12 md:col-span-6 -order-1 md:order-none">
+                <Link to="/work/$slug" params={{ slug: current.slug }}>
+                  <h1 className="display text-[clamp(2.5rem,7vw,6.5rem)] hover:opacity-80 transition-opacity">
+                    {current.title}
+                  </h1>
+                </Link>
+                <p className="mt-5 max-w-md text-sm leading-relaxed text-foreground/80">
+                  {current.summary}
+                </p>
+              </div>
+              <div className="col-span-10 md:col-span-4 label label-muted leading-[1.8]">
+                <div>{current.category}</div>
+                <div>{current.location}</div>
+                <div className="num">{current.year}</div>
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>

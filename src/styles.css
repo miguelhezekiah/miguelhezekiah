@@ -4,13 +4,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Portfolio design system — minimal, near-black, slow cinematic.
-   Single source of truth for all visual tokens. */
+/* Swiss editorial design system — paper white, ink black, vermilion accent.
+   Strict 12-col grid, hairline rules, grotesk type, tabular meta. */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -36,42 +36,45 @@
 }
 
 :root {
-  --radius: 0.25rem;
+  --radius: 0px;
 
-  /* Near-black canvas, off-white type, dim meta */
-  --background: oklch(0.16 0.005 260);
-  --foreground: oklch(0.93 0.005 260);
-  --muted: oklch(0.22 0.005 260);
-  --muted-foreground: oklch(0.55 0.005 260);
-  --border: oklch(0.93 0.005 260 / 0.08);
-  --input: oklch(0.93 0.005 260 / 0.12);
-  --ring: oklch(0.93 0.005 260 / 0.3);
+  /* Paper white canvas, near-black ink, mid grey meta, vermilion accent */
+  --background: oklch(0.985 0.003 90);          /* paper */
+  --foreground: oklch(0.16 0.01 260);           /* ink */
+  --muted: oklch(0.95 0.004 90);
+  --muted-foreground: oklch(0.46 0.01 260);     /* mid grey for meta */
+  --border: oklch(0.16 0.01 260 / 0.14);        /* hairline */
+  --input: oklch(0.16 0.01 260 / 0.18);
+  --ring: oklch(0.58 0.21 28 / 0.4);
 
-  --card: oklch(0.18 0.005 260);
+  --card: oklch(0.94 0.005 90);                 /* image placeholder */
   --card-foreground: var(--foreground);
-  --popover: oklch(0.18 0.005 260);
+  --popover: var(--background);
   --popover-foreground: var(--foreground);
   --primary: var(--foreground);
   --primary-foreground: var(--background);
-  --secondary: oklch(0.22 0.005 260);
+  --secondary: oklch(0.95 0.004 90);
   --secondary-foreground: var(--foreground);
-  --accent: oklch(0.22 0.005 260);
-  --accent-foreground: var(--foreground);
-  --destructive: oklch(0.62 0.22 22);
-  --destructive-foreground: var(--foreground);
 
-  /* Typography — Helvetica everywhere, one family, one stack */
-  --font-sans-stack: "Helvetica Neue", Helvetica, Arial, "Inter", system-ui, sans-serif;
+  /* Editorial vermilion — used sparingly */
+  --accent: oklch(0.58 0.21 28);
+  --accent-foreground: oklch(0.985 0.003 90);
+
+  --destructive: oklch(0.55 0.22 28);
+  --destructive-foreground: oklch(0.985 0.003 90);
+
+  /* Typography — grotesk stack, no webfont required */
+  --font-sans-stack: "Neue Haas Grotesk Display", "Helvetica Neue", "Inter Tight", Helvetica, Arial, system-ui, sans-serif;
   --font-display-stack: var(--font-sans-stack);
 
   /* Layout tokens */
-  --site-padding-x: clamp(16px, 2vw, 24px);
-  --site-padding-y: clamp(16px, 2.4vh, 28px);
-  --grid-gap: clamp(12px, 1.4vw, 16px);
+  --site-padding-x: clamp(24px, 3vw, 48px);
+  --site-padding-y: clamp(18px, 2.4vh, 28px);
+  --grid-gap: clamp(16px, 1.6vw, 24px);
   --grid-cols: 6;
   --section-gap: clamp(96px, 14vh, 180px);
   --label-size: 0.6875rem;
-  --label-tracking: 0.06em;
+  --label-tracking: 0.12em;
 }
 
 @media (min-width: 768px) {
@@ -93,6 +96,7 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "ss02", "tnum";
   }
 
   body {
@@ -110,8 +114,8 @@
   }
 
   ::selection {
-    background-color: var(--color-foreground);
-    color: var(--color-background);
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
   }
 
   a {
@@ -126,21 +130,47 @@
     letter-spacing: var(--label-tracking);
     text-transform: uppercase;
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
   }
   .label-muted {
     color: var(--color-muted-foreground);
   }
   .display {
     font-family: var(--font-display);
-    font-weight: 300;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 0.92;
+  }
+  .display-light {
+    font-family: var(--font-display);
+    font-weight: 400;
     letter-spacing: -0.02em;
-    line-height: 0.98;
+    line-height: 1;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+  }
+  .accent {
+    color: var(--color-accent);
+  }
+  .rule {
+    height: 1px;
+    width: 100%;
+    background: var(--color-border);
+  }
+  .rule-thick {
+    height: 2px;
+    width: 100%;
+    background: var(--color-foreground);
+  }
+  .rule-v {
+    width: 1px;
+    align-self: stretch;
+    background: var(--color-border);
   }
 
-  /* ===== Grid system =====
-     Every page wraps content in .page-grid. Children declare span via
-     .col-span-{n} (1..12). On mobile, the grid drops to 6 columns; spans
-     greater than 6 clamp to full row (handled inline via responsive classes). */
+  /* ===== Grid system ===== */
   .page-grid {
     display: grid;
     grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
@@ -151,7 +181,6 @@
   }
   .col-span-full { grid-column: 1 / -1; }
 
-  /* Debug overlay */
   .grid-debug {
     pointer-events: none;
     position: fixed;
@@ -163,7 +192,7 @@
     padding: 0 var(--site-padding-x);
   }
   .grid-debug > span {
-    background: color-mix(in oklab, var(--color-foreground) 6%, transparent);
+    background: color-mix(in oklab, var(--color-foreground) 4%, transparent);
     border-left: 1px dashed color-mix(in oklab, var(--color-foreground) 18%, transparent);
     border-right: 1px dashed color-mix(in oklab, var(--color-foreground) 18%, transparent);
   }

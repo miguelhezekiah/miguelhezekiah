@@ -28,10 +28,10 @@ function Index() {
         <Link
           to="/"
           hash="about"
-          className="absolute bottom-24 left-1/2 -translate-x-1/2 label label-muted z-20 flex flex-col items-center gap-2 hover:opacity-100 opacity-70 transition-opacity"
+          className="absolute bottom-28 right-[var(--site-padding-x)] label label-muted z-20 flex flex-col items-end gap-2 hover:text-foreground transition-colors"
         >
-          <span>scroll</span>
-          <span className="block h-6 w-px bg-current" />
+          <span className="block h-12 w-px bg-current" />
+          <span>↓ Continue</span>
         </Link>
       </section>
 
