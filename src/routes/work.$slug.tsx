@@ -31,12 +31,41 @@ function WorkDetail() {
   if (!project) throw notFound();
 
   const idx = all.findIndex((p) => p.slug === slug);
-  const next = all[(idx + 1) % Math.max(all.length, 1)];
+  const related = all.length > 1
+    ? [all[(idx + 1) % all.length], all[(idx + 2) % all.length]].filter(
+        (p, i, arr) => p.slug !== project.slug && arr.findIndex((x) => x.slug === p.slug) === i,
+      )
+    : [];
+
+  // Metadata fields, omitting empties
+  const meta: Array<[string, string]> = [];
+  if (project.location) meta.push(["Place", project.location]);
+  if (project.year) meta.push(["Year", project.year]);
+  if (project.category) meta.push(["Program", project.category]);
+  if (project.role) meta.push(["Role", project.role]);
+  if (project.tags?.length) meta.push(["Type", project.tags[0]]);
+
+  // Interleave: image after paragraph 1, 3, 5… then dump remainder
+  const paras = project.body ?? [];
+  const imgs = project.gallery_urls ?? [];
+  const stream: Array<{ kind: "p"; value: string; i: number } | { kind: "img"; value: string; i: number }> = [];
+  let imgCursor = 0;
+  paras.forEach((p, pIdx) => {
+    stream.push({ kind: "p", value: p, i: pIdx });
+    if (pIdx % 2 === 1 && imgCursor < imgs.length) {
+      stream.push({ kind: "img", value: imgs[imgCursor], i: imgCursor });
+      imgCursor++;
+    }
+  });
+  while (imgCursor < imgs.length) {
+    stream.push({ kind: "img", value: imgs[imgCursor], i: imgCursor });
+    imgCursor++;
+  }
 
   return (
     <main className="relative">
-      {/* Full-bleed image */}
-      <div className="relative h-[72dvh] w-full overflow-hidden bg-card mt-12">
+      {/* Hero with title overlay */}
+      <div className="relative h-[85dvh] w-full overflow-hidden bg-card mt-12">
         <motion.img
           src={heroFor(project)}
           alt={project.title}
@@ -45,151 +74,130 @@ function WorkDetail() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 1.4, ease: motionConfig.ease }}
         />
-        <div className="grid grid-cols-12 gap-4 md:gap-6 items-end">
-          <div className="col-span-12 md:col-span-3 label label-muted flex flex-wrap gap-x-3">
-            <span style={{ color: "var(--color-accent)" }}>{project.category}</span>
-            <span>·</span>
-            <span>{project.location}</span>
-            <span>·</span>
-            <span className="num">{project.year}</span>
-          </div>
-          <h1 className="col-span-12 md:col-span-9 display text-[clamp(2.25rem,8vw,7rem)] leading-[0.92]">
-            {project.title}
-          </h1>
-        </div>
+        <h1
+          className="display absolute leading-[0.9] text-background pointer-events-none"
+          style={{
+            left: "var(--site-padding-x)",
+            bottom: "var(--site-padding-y)",
+            right: "var(--site-padding-x)",
+            fontSize: "clamp(2.5rem, 9vw, 8rem)",
+          }}
+        >
+          {project.title}
+        </h1>
       </div>
 
-      {/* Body — sticky meta + long form */}
-      <section
-        className="mx-auto max-w-7xl"
-        style={{ padding: "calc(var(--site-padding-y) * 5) var(--site-padding-x)" }}
-      >
-        <div className="grid gap-12 md:grid-cols-12 md:gap-16">
-          <aside className="md:col-span-4 lg:col-span-3">
-            <div className="md:sticky md:top-24 space-y-6">
-              <div>
-                <div className="label label-muted">Year</div>
-                <div className="mt-1 text-sm">{project.year}</div>
-              </div>
-              <div>
-                <div className="label label-muted">Role</div>
-                <div className="mt-1 text-sm">{project.role}</div>
-              </div>
-              <div>
-                <div className="label label-muted">Location</div>
-                <div className="mt-1 text-sm">{project.location}</div>
-              </div>
-              <div>
-                <div className="label label-muted">Category</div>
-                <div className="mt-1 text-sm">{project.category}</div>
-              </div>
-              {project.tags?.length > 0 && (
-                <div>
-                  <div className="label label-muted mb-2">Tags</div>
-                  <div className="label flex flex-wrap gap-x-2 gap-y-1">
-                    {project.tags.map((t, i) => (
-                      <span key={t}>
-                        {i > 0 && <span className="opacity-40 mr-2">·</span>}
-                        {t}
-                      </span>
-                    ))}
-                  </div>
+      {/* Metadata grid */}
+      {meta.length > 0 && (
+        <section
+          className="border-y border-foreground"
+          style={{ paddingLeft: "var(--site-padding-x)", paddingRight: "var(--site-padding-x)" }}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4">
+            {meta.map(([label, value], i) => (
+              <div
+                key={label}
+                className={`py-6 ${i > 0 ? "md:border-l border-foreground" : ""} ${
+                  i % 2 === 1 ? "border-l border-foreground md:border-l" : ""
+                } md:px-6 ${i === 0 ? "" : "px-6"}`}
+              >
+                <div className="label label-muted mb-2">
+                  {label} <span style={{ color: "var(--color-accent)" }}>/</span>
                 </div>
-              )}
-            </div>
-          </aside>
-
-          <div className="md:col-span-8 lg:col-span-8 lg:col-start-5 space-y-10">
-            <p className="display text-2xl md:text-3xl leading-snug text-foreground/95">{project.summary}</p>
-            <div className="space-y-6 text-base leading-relaxed text-foreground/85">
-              {project.body.map((para, i) => (
-                <ScrollReveal key={i} delay={i * 0.05}>
-                  <p>{para}</p>
-                </ScrollReveal>
-              ))}
-            </div>
+                <div className={`display text-lg md:text-xl ${label === "Year" ? "num" : ""}`}>
+                  {value}
+                </div>
+              </div>
+            ))}
           </div>
+        </section>
+      )}
+
+      {/* Body + interleaved gallery */}
+      <section
+        style={{ padding: "calc(var(--site-padding-y) * 4) var(--site-padding-x)" }}
+      >
+        <div className="space-y-12 md:space-y-16">
+          {project.summary && (
+            <p className="display text-2xl md:text-4xl leading-snug text-foreground/95 max-w-[72ch]">
+              {project.summary}
+            </p>
+          )}
+
+          {stream.map((item, i) =>
+            item.kind === "p" ? (
+              <ScrollReveal key={`p-${item.i}`} delay={0.04}>
+                <p className="text-base md:text-lg leading-relaxed text-foreground/85 max-w-[72ch]">
+                  {item.value}
+                </p>
+              </ScrollReveal>
+            ) : (
+              <ScrollReveal key={`img-${item.i}`} delay={0.04}>
+                <img
+                  src={item.value}
+                  alt=""
+                  loading="lazy"
+                  className="w-full h-auto"
+                />
+              </ScrollReveal>
+            ),
+          )}
         </div>
 
-        {/* metrics band */}
+        {/* Metrics band */}
         {project.metrics?.length > 0 && (
-          <div className="mt-24 grid grid-cols-2 gap-8 border-y border-border py-10 md:grid-cols-4">
+          <div className="mt-24 grid grid-cols-2 gap-8 border-y border-foreground py-10 md:grid-cols-4">
             {project.metrics.map(([k, v], i) => (
               <ScrollReveal key={k} delay={i * 0.04}>
                 <div>
-                  <div className="display text-3xl">{v}</div>
+                  <div className="display text-3xl num">{v}</div>
                   <div className="label label-muted mt-2">{k}</div>
                 </div>
               </ScrollReveal>
             ))}
           </div>
         )}
-
-        {/* asymmetric gallery */}
-        {project.gallery_urls?.length > 0 && (
-          <div className="mt-24 space-y-4 md:space-y-6">
-            {chunkAsymmetric(project.gallery_urls).map((row, i) => (
-              <div
-                key={i}
-                className={row.length === 1 ? "grid grid-cols-1" : "grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6"}
-              >
-                {row.map((url, j) => (
-                  <ScrollReveal key={url} delay={j * 0.05}>
-                    <img src={url} alt="" className="w-full" loading="lazy" />
-                  </ScrollReveal>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
       </section>
 
-      {/* Next */}
-      {next && next.slug !== project.slug && (
-        <Link
-          to="/work/$slug"
-          params={{ slug: next.slug }}
-          className="group block border-t border-border relative overflow-hidden"
+      {/* Related works */}
+      {related.length > 0 && (
+        <section
+          className="border-t border-foreground"
+          style={{ padding: "calc(var(--site-padding-y) * 3) var(--site-padding-x)" }}
         >
-          <div
-            className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center"
-            style={{ padding: "calc(var(--site-padding-y) * 4) var(--site-padding-x)" }}
-          >
-            <div className="md:col-span-3 aspect-[4/3] overflow-hidden bg-card">
-              <img
-                src={heroFor(next)}
-                alt={next.title}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-              />
-            </div>
-            <div className="md:col-span-9">
-              <div className="label label-muted mb-3">Next project</div>
-              <div className="display text-3xl md:text-5xl transition-transform duration-500 group-hover:translate-x-2">
-                {next.title} →
-              </div>
-            </div>
+          <div className="label label-muted mb-8">
+            <span style={{ color: "var(--color-accent)" }}>—</span> Related works
           </div>
-        </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+            {related.map((p) => (
+              <Link
+                key={p.id}
+                to="/work/$slug"
+                params={{ slug: p.slug }}
+                className="group block"
+              >
+                <div className="aspect-[4/3] overflow-hidden bg-card">
+                  <img
+                    src={heroFor(p)}
+                    alt={p.title}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                  />
+                </div>
+                <div className="mt-3 border-t border-foreground pt-2 flex items-baseline justify-between gap-3">
+                  <span className="display text-xl md:text-2xl transition-transform duration-500 group-hover:-translate-y-0.5">
+                    {p.title} →
+                  </span>
+                  <span className="label label-muted">
+                    {p.category} — <span className="num">{p.year}</span>
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
+
       <Footer />
     </main>
   );
-}
-
-function chunkAsymmetric(urls: string[]): string[][] {
-  // pattern: 1, 2, 1, 2, …
-  const out: string[][] = [];
-  let i = 0;
-  let big = true;
-  while (i < urls.length) {
-    if (big) {
-      out.push([urls[i]]);
-      i += 1;
-    } else {
-      out.push(urls.slice(i, i + 2));
-      i += 2;
-    }
-    big = !big;
-  }
-  return out;
 }
