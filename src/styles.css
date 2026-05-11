@@ -69,11 +69,11 @@
   --font-display-stack: var(--font-sans-stack);
 
   /* Layout tokens */
-  --site-padding-x: clamp(2rem, 5vw, 2rem);
-  --site-padding-y: clamp(2rem, 5vw, 2rem);
+  --site-padding-x: clamp(10px, 2vw, 30px);
+  --site-padding-y: clamp(10px, 2vw, 30px);
   --grid-gap: clamp(16px, 1.6vw, 24px);
   --grid-cols: 6;
-  --section-gap: clamp(120px, 18vh, 240px);
+  --section-gap: clamp(30px, 4vh, 50px);
   --label-size: 0.6875rem;
   --label-tracking: 0.12em;
 }
