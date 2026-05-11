@@ -26,7 +26,7 @@ export function CornerLabels() {
       <motion.div
         animate={{ y: navHidden ? -56 : 0, opacity: navHidden ? 0 : 1 }}
         transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
-        className="pointer-events-auto w-full border-b border-border bg-background/85 backdrop-blur-sm"
+        className="pointer-events-auto w-full border-b border-foreground bg-background"
       >
         <div
           className="flex items-center justify-between"

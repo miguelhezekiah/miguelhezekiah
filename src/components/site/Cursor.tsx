@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 export function Cursor() {
   const [enabled, setEnabled] = useState(false);
+  const reticleRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
+  const hoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
@@ -22,27 +23,26 @@ export function Cursor() {
       if (dotRef.current) {
         dotRef.current.style.transform = `translate3d(${x - 2}px, ${y - 2}px, 0)`;
       }
+      if (hoverRef.current) {
+        hoverRef.current.style.transform = `translate3d(${x - 5}px, ${y - 5}px, 0)`;
+      }
     };
 
     const tick = () => {
-      rx += (x - rx) * 0.12;
-      ry += (y - ry) * 0.12;
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${rx - 16}px, ${ry - 16}px, 0)`;
+      rx += (x - rx) * 0.18;
+      ry += (y - ry) * 0.18;
+      if (reticleRef.current) {
+        reticleRef.current.style.transform = `translate3d(${rx - 12}px, ${ry - 12}px, 0)`;
       }
       raf = requestAnimationFrame(tick);
     };
 
     const onOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
-      const interactive = target?.closest("a,button,[role='button']");
-      if (ringRef.current) {
-        ringRef.current.style.opacity = interactive ? "1" : "0.5";
-        ringRef.current.style.width = interactive ? "44px" : "32px";
-        ringRef.current.style.height = interactive ? "44px" : "32px";
-        ringRef.current.style.marginLeft = interactive ? "-22px" : "-16px";
-        ringRef.current.style.marginTop = interactive ? "-22px" : "-16px";
-      }
+      const interactive = !!target?.closest("a,button,[role='button']");
+      if (reticleRef.current) reticleRef.current.style.opacity = interactive ? "0" : "1";
+      if (dotRef.current) dotRef.current.style.opacity = interactive ? "0" : "1";
+      if (hoverRef.current) hoverRef.current.style.opacity = interactive ? "1" : "0";
     };
 
     window.addEventListener("pointermove", onMove);
@@ -59,13 +59,25 @@ export function Cursor() {
   if (!enabled) return null;
   return (
     <>
+      {/* Crosshair reticle (lerped) */}
       <div
-        ref={ringRef}
-        className="pointer-events-none fixed top-0 left-0 z-50 h-8 w-8 rounded-full border border-foreground/40 mix-blend-difference transition-[width,height,margin,opacity] duration-300"
-      />
+        ref={reticleRef}
+        className="pointer-events-none fixed top-0 left-0 z-50 h-6 w-6"
+      >
+        <span className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-foreground" />
+        <span className="absolute top-1/2 left-0 h-px w-full -translate-y-1/2 bg-foreground" />
+      </div>
+      {/* Center accent dot (instant) */}
       <div
         ref={dotRef}
-        className="pointer-events-none fixed top-0 left-0 z-50 h-1 w-1 rounded-full bg-foreground mix-blend-difference"
+        className="pointer-events-none fixed top-0 left-0 z-50 h-1 w-1"
+        style={{ background: "var(--color-accent)" }}
+      />
+      {/* Hover state — filled vermilion square */}
+      <div
+        ref={hoverRef}
+        className="pointer-events-none fixed top-0 left-0 z-50 h-[10px] w-[10px] opacity-0"
+        style={{ background: "var(--color-accent)" }}
       />
     </>
   );

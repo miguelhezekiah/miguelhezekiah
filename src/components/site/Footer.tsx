@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "@tanstack/react-router";
 import { siteConfig } from "@/config/site";
-import { IndexCounter } from "./IndexCounter";
 import { setFooterVisible } from "@/lib/footer-visibility";
 
 export function Footer() {
@@ -25,37 +24,62 @@ export function Footer() {
     };
   }, []);
 
+  const rows: Array<[string, string, string]> = [
+    ["Email", siteConfig.email, `mailto:${siteConfig.email}`],
+    ["Instagram", "@" + siteConfig.name.toLowerCase().replace(/\s/g, ""), siteConfig.socials.instagram],
+    ["LinkedIn", siteConfig.name, siteConfig.socials.linkedin],
+    ["GitHub", siteConfig.name.toLowerCase().replace(/\s/g, ""), siteConfig.socials.github],
+  ];
+
   return (
     <footer
       ref={ref}
-      className="border-t border-border"
-      style={{ padding: "calc(var(--site-padding-y) * 2) var(--site-padding-x)" }}
+      style={{
+        padding: "calc(var(--site-padding-y) * 4) var(--site-padding-x)",
+        background: "var(--color-foreground)",
+        color: "var(--color-background)",
+      }}
     >
-      <div className="grid grid-cols-12 items-start gap-6">
-        {/* Top-left — handed off from CornerLabels */}
-        <div className="col-span-6 md:col-span-3 label label-muted flex items-center gap-3">
-          <span>{sectionLabel}</span>
-          {idx >= 0 && <IndexCounter idx={idx} total={total} />}
+      <div className="grid grid-cols-12 gap-6 items-start">
+        {/* Left — wordmark colophon */}
+        <div className="col-span-12 md:col-span-4">
+          <div className="display text-[clamp(2rem,5vw,4rem)] leading-[0.9]">
+            {siteConfig.name}
+          </div>
+          <div className="label mt-4 opacity-60">{siteConfig.role}</div>
         </div>
 
-        {/* Center — email */}
-        <div className="col-span-12 md:col-span-5 md:text-center label order-3 md:order-2">
-          <a href={`mailto:${siteConfig.email}`} className="hover:opacity-60 transition-opacity">
-            {siteConfig.email}
-          </a>
-        </div>
+        {/* Middle — contact list */}
+        <dl className="col-span-12 md:col-span-5 mt-8 md:mt-0">
+          {rows.map(([k, v, href]) => (
+            <a
+              key={k}
+              href={href}
+              className="grid grid-cols-12 gap-3 py-3 group"
+              style={{ borderTop: "1px solid color-mix(in oklab, currentColor 22%, transparent)" }}
+            >
+              <dt className="col-span-4 label opacity-50">{k}</dt>
+              <dd className="col-span-8 label transition-colors group-hover:text-[color:var(--color-accent)]">
+                {v}
+              </dd>
+            </a>
+          ))}
+        </dl>
 
-        {/* Right — socials */}
-        <div className="col-span-6 md:col-span-4 label flex gap-4 md:gap-6 justify-end order-2 md:order-3">
-          <a href={siteConfig.socials.instagram} className="hover:opacity-60">
-            Instagram
-          </a>
-          <a href={siteConfig.socials.linkedin} className="hover:opacity-60">
-            LinkedIn
-          </a>
-          <a href={siteConfig.socials.github} className="hover:opacity-60">
-            GitHub
-          </a>
+        {/* Right — folio */}
+        <div className="col-span-12 md:col-span-3 mt-8 md:mt-0 flex flex-col items-start md:items-end gap-3">
+          <div className="display num text-[clamp(2.5rem,4vw,3.5rem)] leading-none">
+            © 26
+          </div>
+          {idx >= 0 && (
+            <div className="label opacity-60">
+              <span className="num" style={{ color: "var(--color-accent)" }}>
+                {String(idx + 1).padStart(2, "0")}
+              </span>
+              <span className="opacity-50"> / {String(total).padStart(2, "0")}</span>
+              <span className="ml-2">{sectionLabel}</span>
+            </div>
+          )}
         </div>
       </div>
     </footer>

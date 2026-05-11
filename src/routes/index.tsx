@@ -28,9 +28,10 @@ function Index() {
         <Link
           to="/"
           hash="about"
-          className="absolute bottom-28 right-[var(--site-padding-x)] label label-muted z-20 flex flex-col items-end gap-2 hover:text-foreground transition-colors"
+          className="absolute bottom-32 right-[var(--site-padding-x)] label z-20 flex flex-col items-end gap-2"
+          style={{ color: "var(--color-accent)" }}
         >
-          <span className="block h-12 w-px bg-current" />
+          <span className="block h-12 w-px" style={{ background: "var(--color-accent)" }} />
           <span>↓ Continue</span>
         </Link>
       </section>

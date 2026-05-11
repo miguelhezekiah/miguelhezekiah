@@ -92,7 +92,7 @@ function WorkIndex() {
         </div>
 
         {/* Toolbar */}
-        <div className="col-span-full flex flex-wrap items-center gap-x-6 gap-y-4 border-y border-border py-5 sticky top-0 bg-background/85 backdrop-blur z-30">
+        <div className="col-span-full flex flex-wrap items-center gap-x-6 gap-y-4 border-y border-foreground py-5 sticky top-0 bg-background z-30">
           <div className="flex items-center gap-3">
             <span className="label label-muted">View</span>
             {(["grid", "list"] as const).map((v) => (
@@ -182,30 +182,66 @@ function WorkIndex() {
 }
 
 function GridView({ items }: { items: Project[] }) {
+  // Asymmetric editorial catalogue: alternate 8/4, 4/8, full-bleed every 5th
+  const rows: Project[][] = [];
+  let i = 0;
+  let pattern = 0;
+  while (i < items.length) {
+    if (pattern % 3 === 2) {
+      rows.push(items.slice(i, i + 1));
+      i += 1;
+    } else {
+      rows.push(items.slice(i, i + 2));
+      i += 2;
+    }
+    pattern++;
+  }
   return (
-    <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-3 md:gap-6">
-      {items.map((p) => (
-        <li key={p.id}>
-          <Link to="/work/$slug" params={{ slug: p.slug }} className="group block">
-            <div className="aspect-square overflow-hidden bg-card">
-              <img
-                src={heroFor(p)}
-                alt={p.title}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                draggable={false}
-              />
-            </div>
-            <div className="mt-3 flex items-baseline justify-between gap-3">
-              <span className="display text-lg md:text-xl transition-transform duration-500 group-hover:-translate-y-0.5">
-                {p.title}
-              </span>
-              <span className="label label-muted">{p.year}</span>
-            </div>
-            <div className="label label-muted mt-1">{p.category}</div>
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-10 md:space-y-14">
+      {rows.map((row, rIdx) => {
+        const layout =
+          row.length === 1
+            ? ["col-span-12"]
+            : rIdx % 2 === 0
+              ? ["col-span-12 md:col-span-8", "col-span-12 md:col-span-4"]
+              : ["col-span-12 md:col-span-4", "col-span-12 md:col-span-8"];
+        return (
+          <div key={rIdx} className="grid grid-cols-12 gap-4 md:gap-6">
+            {row.map((p, cIdx) => {
+              const globalIdx = items.indexOf(p);
+              return (
+                <Link
+                  key={p.id}
+                  to="/work/$slug"
+                  params={{ slug: p.slug }}
+                  className={`group block ${layout[cIdx]}`}
+                >
+                  <div className={`overflow-hidden bg-card ${row.length === 1 ? "aspect-[16/8]" : "aspect-[4/3]"}`}>
+                    <img
+                      src={heroFor(p)}
+                      alt={p.title}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      draggable={false}
+                    />
+                  </div>
+                  <div className="mt-3 border-t border-foreground pt-2 flex items-baseline justify-between gap-3">
+                    <div className="flex items-baseline gap-3">
+                      <span className="num label" style={{ color: "var(--color-accent)" }}>
+                        {String(globalIdx + 1).padStart(2, "0")}
+                      </span>
+                      <span className="display text-lg md:text-2xl transition-transform duration-500 group-hover:-translate-y-0.5">
+                        {p.title}
+                      </span>
+                    </div>
+                    <span className="label label-muted">{p.category} — {p.year}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

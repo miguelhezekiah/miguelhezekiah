@@ -455,7 +455,7 @@ export function TimelineGraphic() {
                 transition={{ delay: sweepFor(y) }}
                 className="relative"
               >
-                <span className="absolute -left-[31px] top-1 inline-block h-2 w-2 rounded-full bg-foreground" />
+                <span className="absolute -left-[31px] top-1 inline-block h-2 w-2 bg-foreground" />
                 <div className="label">{y === 2027 ? "Present" : y}</div>
                 {yp.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -477,7 +477,7 @@ export function TimelineGraphic() {
                     {ys.map((s) => (
                       <span
                         key={s.id}
-                        className="text-xs border border-border rounded-full px-2 py-1"
+                        className="text-xs border border-foreground px-2 py-1"
                       >
                         {s.label}
                         {s.page_ref && (
@@ -496,7 +496,7 @@ export function TimelineGraphic() {
                       {yl.map((l) => (
                         <span
                           key={l.id}
-                          className="text-xs border border-border rounded-full px-2 py-1"
+                          className="text-xs border border-foreground px-2 py-1"
                         >
                           {l.label}
                         </span>
