@@ -25,14 +25,13 @@ export function CornerLabels() {
       <motion.div
         animate={{ y: navHidden ? -56 : 0, opacity: navHidden ? 0 : 1 }}
         transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
-        className="pointer-events-auto w-full bg-background"
+        className="pointer-events-auto w-full bg-transparent"
       >
         <div
           className="flex items-center justify-between"
           style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
         >
           <Link to="/" className="label flex items-center gap-2 hover:opacity-60 transition-opacity duration-300">
-            <span className="num accent">§</span>
             <span>{siteConfig.name}</span>
           </Link>
           <nav className="label flex items-center gap-6">
