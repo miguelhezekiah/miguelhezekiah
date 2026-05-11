@@ -69,8 +69,8 @@
   --font-display-stack: var(--font-sans-stack);
 
   /* Layout tokens */
-  --site-padding-x: clamp(32px, 5vw, 80px);
-  --site-padding-y: clamp(32px, 5vw, 80px);
+  --site-padding-x: clamp(2rem, 5vw, 2rem);
+  --site-padding-y: clamp(2rem, 5vw, 2rem);
   --grid-gap: clamp(16px, 1.6vw, 24px);
   --grid-cols: 6;
   --section-gap: clamp(120px, 18vh, 240px);
