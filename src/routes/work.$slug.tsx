@@ -87,39 +87,33 @@ function WorkDetail() {
         </h1>
       </div>
 
-      {/* Metadata grid */}
+      {/* Metadata — vertical stacked credits list, left-aligned */}
       {meta.length > 0 && (
         <section
-          className="border-y border-foreground"
-          style={{ paddingLeft: "var(--site-padding-x)", paddingRight: "var(--site-padding-x)" }}
+          style={{ padding: "calc(var(--site-padding-y) * 3) var(--site-padding-x) calc(var(--site-padding-y) * 2)" }}
         >
-          <div className="grid grid-cols-2 md:grid-cols-4">
-            {meta.map(([label, value], i) => (
-              <div
-                key={label}
-                className={`py-6 ${i > 0 ? "md:border-l border-foreground" : ""} ${
-                  i % 2 === 1 ? "border-l border-foreground md:border-l" : ""
-                } md:px-6 ${i === 0 ? "" : "px-6"}`}
-              >
-                <div className="label label-muted mb-2">
+          <dl className="max-w-[44ch]">
+            {meta.map(([label, value]) => (
+              <div key={label} className="py-3 border-b border-foreground/20 first:border-t first:border-foreground/20">
+                <dt className="display text-xl md:text-2xl text-foreground/55">
                   {label} <span style={{ color: "var(--color-accent)" }}>/</span>
-                </div>
-                <div className={`display text-lg md:text-xl ${label === "Year" ? "num" : ""}`}>
+                </dt>
+                <dd className={`display text-xl md:text-2xl mt-1 ${label === "Year" ? "num" : ""}`}>
                   {value}
-                </div>
+                </dd>
               </div>
             ))}
-          </div>
+          </dl>
         </section>
       )}
 
       {/* Body + interleaved gallery */}
       <section
-        style={{ padding: "calc(var(--site-padding-y) * 4) var(--site-padding-x)" }}
+        style={{ padding: "calc(var(--site-padding-y) * 2) var(--site-padding-x) calc(var(--site-padding-y) * 4)" }}
       >
         <div className="space-y-12 md:space-y-16">
           {project.summary && (
-            <p className="display text-2xl md:text-4xl leading-snug text-foreground/95 max-w-[72ch]">
+            <p className="text-lg md:text-2xl leading-relaxed text-foreground/95 max-w-[72ch]">
               {project.summary}
             </p>
           )}
