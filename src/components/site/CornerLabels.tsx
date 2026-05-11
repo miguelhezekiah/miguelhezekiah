@@ -79,15 +79,6 @@ export function CornerLabels() {
         )}
       </motion.div>
 
-      {/* Bottom-right meta — 3 line stack */}
-      <div
-        className="pointer-events-auto fixed bottom-0 right-0 label label-muted text-right hidden sm:block leading-[1.6]"
-        style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
-      >
-        <div className="text-foreground">{siteConfig.role}</div>
-        <div>{siteConfig.location}</div>
-        <div className="opacity-60">{siteConfig.copyright}</div>
-      </div>
     </header>
   );
 }
