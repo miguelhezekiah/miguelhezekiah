@@ -1,134 +1,79 @@
-# Plan — Fix slug routing + Swiss editorial redesign
+## Goal
 
-## 1. Bug: project / thinking detail pages redirect to index
+Push the site further into Swiss editorial / magazine territory: replace soft UI cues (gradients, drop shadows, decorative borders, ring/glow cursor) with **hard-edged**, **graphic**, **block-color** treatments. Keep all motion intact.
 
-**Root cause.** With TanStack's flat file routing, `src/routes/work.tsx` is
-treated as the *layout* for `src/routes/work.$slug.tsx` because a child
-route exists. `WorkIndex` doesn't render an `<Outlet />`, so navigating to
-`/work/hangar` matches the slug route but only the parent layout
-(WorkIndex) ever paints — you appear to "go back" to /work. Same bug for
-`thinking.tsx` + `thinking.$slug.tsx`.
+---
 
-**Fix.** Rename the index pages so they're true sibling routes, not parent
-layouts:
+## 1. Cursor — Swiss-style crosshair
 
-- `src/routes/work.tsx`  →  `src/routes/work.index.tsx`
-- `src/routes/thinking.tsx`  →  `src/routes/thinking.index.tsx`
+`src/components/site/Cursor.tsx`
 
-No code changes inside the files. The Vite plugin will regenerate
-`routeTree.gen.ts` automatically. This makes `/work` and `/work/$slug`
-proper siblings under the root, and the slug pages will render.
+- Replace the current dot + soft ring with a **hard crosshair reticle**:
+  - Two thin (1px) ink-colored lines forming a `+`, ~22px long each.
+  - Small filled square (4×4) at the center, in the editorial vermilion accent.
+  - On hoverable elements (`a, button, [role=button]`): swap to a filled vermilion square (10×10), no border, no scaling halo.
+- Remove `mix-blend-difference`, `border`, `rounded-full`, and the soft transition. Use sharp color from tokens (`--foreground`, `--accent`).
+- Lerp position kept (so it still feels alive) but no size morphing — instant state swap on hover.
 
-## 2. Swiss editorial redesign (motion preserved)
+## 2. Remove drop shadows & decorative borders
 
-Goal: shift from the current near-black cinematic look to a **Swiss
-editorial** aesthetic — Müller-Brockmann / Massimo Vignelli / Werkplaats
-energy: strict 12-col grid, hairline rules, generous white space, big
-left-aligned headlines, tabular meta, small caps labels, restrained accent.
-Keep all current Framer Motion transitions (page sweep, hero crossfade,
-hover, scroll-reveal) — only visual tokens and layout rhythm change.
+Global sweep — keep only **hairline rules** that act as typographic dividers (the `.rule` / `border-y` used as horizontal lines in toolbars, metrics band, footer top). Remove everything else:
 
-### 2a. Tokens (`src/styles.css`)
+- `src/components/ui/card.tsx` — remove `shadow` and `border` from `Card` base; leave it as a plain block.
+- `src/components/ui/button.tsx` — strip `shadow`, `shadow-sm`, `border` from default/destructive/outline/secondary variants. Outline becomes a plain inverted block (bg swap on hover) instead of a bordered pill. Keep `rounded-md` removed already by `--radius: 0`.
+- `src/routes/work.$slug.tsx` — remove the rounded-pill border around tag chips (lines 92–96): render tags as plain uppercase labels separated by middots, no border, no padding box.
+- `src/components/site/CornerLabels.tsx` — remove the `backdrop-blur-sm` + translucent bg on the top bar; replace with a solid paper fill (`bg-background`) and keep only the bottom hairline. No shadow.
+- `src/routes/work.index.tsx` toolbar (line 95) — drop `backdrop-blur` and translucent bg; use solid `bg-background` with top + bottom hairline only.
+- Search the project for any remaining `shadow-`, `drop-shadow`, `ring-`, `rounded-full`, `rounded-xl` used decoratively and strip them. Form inputs keep their functional focus ring.
 
-- **Palette:** flip to a paper-white canvas with near-black ink and a
-  single editorial red accent.
-  - `--background` paper white (~oklch(0.985 0.003 90))
-  - `--foreground` near-black ink (~oklch(0.16 0.01 260))
-  - `--muted-foreground` mid grey for meta
-  - `--border` 1px hairline at ~12% ink
-  - `--accent` editorial vermilion (~oklch(0.58 0.21 28)) — used sparingly
-    on active states, the index counter, current-section underline, and
-    `::selection`
-- **Type stack:**
-  - `--font-display-stack`: a grotesk pair —
-    `"Neue Haas Grotesk Display", "Helvetica Neue", Helvetica, Arial, sans-serif`
-    (falls back cleanly; no webfont required)
-  - `--font-sans-stack`: same family for body, slightly tighter tracking
-  - `.display` weight goes from 300 → **500/600** with tighter
-    `letter-spacing: -0.025em` and `line-height: 0.92` for poster-scale H1s
-  - `.label` becomes 10/11px tabular-nums, +0.12em tracking, uppercase
-- **Grid rhythm:** keep 12-col; tighten gutters
-  (`--grid-gap: clamp(16px, 1.6vw, 24px)`), widen page padding
-  (`--site-padding-x: clamp(24px, 3vw, 48px)`).
-- **Rules:** introduce a `.rule` utility (1px hairline) and a `.rule-thick`
-  (2px) used as section dividers — a Swiss staple.
-- **Numbering:** add `.num` (tabular-nums, mono-feel via grotesk) for the
-  01 / 04 counters in CornerLabels and ListView.
+## 3. Footer — filled ink block
 
-### 2b. Header / CornerLabels
+`src/components/site/Footer.tsx`
 
-- Replace the floating wordmark + nav with a **top hairline-ruled bar**:
-  wordmark left, nav right, all underneath a 1px rule that spans the page.
-  Active nav uses the accent colour + small bullet, not underline.
-- Bottom-left: section label gets a leading numeric prefix `§ 02 / Work`,
-  tabular-nums.
-- Bottom-right meta becomes a 3-line stack: role / location / © year.
-- Keep the existing scroll-direction hide animation untouched.
+- Invert the footer into a **solid ink slab**: `background: var(--foreground)`, `color: var(--background)`. No top border (the color change is the divider).
+- Increase vertical padding to feel like a poster colophon.
+- Restructure into a 12-col magazine colophon:
+  - Left (cols 1–4): oversized wordmark + role, set in `.display` at ~clamp(2rem, 5vw, 4rem).
+  - Middle (cols 5–8): `dt/dd` style contact list (Email, Instagram, LinkedIn, GitHub) — each row a hairline divider in `--background / 20%`.
+  - Right (cols 9–12): big tabular year `© 2026` and section index, right-aligned.
+- Hover state on links: vermilion accent only (no underline animation).
+- Remove the existing IndexCounter row inside the footer (visual noise) — section index lives in the right column instead.
 
-### 2c. Index / Hero
+## 4. Replace gradients with sharp color blocks
 
-- HeroRotator keeps its crossfade. Overlay a Swiss caption block in the
-  bottom-left (not centered) with a 12-col mini-grid:
-  - col 1–2: running number (`01 / 06`)
-  - col 3–7: project title (poster scale, tight)
-  - col 8–12: meta stack (category / location / year), each on its own line
-- Replace the centered "scroll" pill with a left-aligned vertical rule +
-  tiny "↓ continue" label.
+Hunt down every `bg-gradient-*`, `from-…/to-…`, and soft scrim, and swap for **flat planes** that read as magazine compositional blocks.
 
-### 2d. Work index
+- `src/components/site/HeroRotator.tsx` (line 77) — delete the `bg-gradient-to-t from-background/80 …` scrim. Instead overlay a **solid paper caption slab** (bottom ~38% of the viewport) using `background: var(--background)`, with the image cropped above it. The image and the slab meet on a hard horizontal line — classic magazine cover. Caption block rendered on top of the slab.
+- `src/routes/work.$slug.tsx` hero (line 48) — delete gradient scrim. Move title + meta out of the absolute overlay and into a **flat paper slab below** the image (full-bleed image, then a ruled white caption block). Title baseline aligns to a 12-col grid; meta sits on a hairline above the title.
+- `src/routes/index.tsx` Continue affordance (line 28) — already flat; tighten to a 1px vermilion vertical rule + label, no fade.
+- Remove any `via-…` / `to-transparent` overlays elsewhere (search and verify).
 
-- Convert grid view from 3-up squares to a **classic editorial 12-col
-  catalogue**: alternating asymmetric rows (3+9, 6+6, 9+3) with image
-  thumbs that have *no* rounded corners or shadow — just the photograph
-  and a tight caption block underneath (title left, year right, hairline
-  rule, category small-caps).
-- List view: numbered table with 4 columns
-  (`№ | Title | Category | Year`), `border-t` hairlines, hover slides the
-  title 12px right (existing motion kept).
-- Toolbar: drop the bg-blur pill; use a flush hairline-ruled strip with
-  uppercase label dividers (`View · Sort · Type · Tags`) separated by
-  vertical hairlines.
+## 5. Graphical magazine layout cues (presentational only)
 
-### 2e. Project detail (`work.$slug.tsx`)
+Small additions to reinforce the editorial shift, motion preserved:
 
-- Replace the dark gradient hero overlay with a **white caption slab**
-  that sits beneath the hero (not over it), Swiss-style: huge left-aligned
-  H1, 12-col meta strip, then a 1px rule.
-- Sticky sidebar becomes a true 3-col aside with `dt/dd` definition list
-  styling (label small-caps, value grotesk regular).
-- Body copy moves to col 5–11 (max measure ~62ch) — single-column, tight
-  leading, drop-cap on the first paragraph.
-- Metrics band: numbers become poster-scale (`clamp(3rem, 6vw, 6rem)`)
-  with hairline dividers between cells.
-- Gallery: keep asymmetric chunking but remove all gaps inside row pairs
-  (full-bleed pair) for a magazine-spread feel.
-- Next-project block: full-bleed, swap to a horizontal 12-col layout with
-  oversized `→` glyph in the accent colour.
+- Add a `.poster-num` utility in `src/styles.css` for oversized tabular figures used as folio markers (e.g. running project number on hero, "01" badges in Work index list).
+- `src/routes/work.index.tsx` GridView: convert uniform 3-col grid into an **asymmetric editorial catalogue** — rows alternate `[col-span-8, col-span-4]`, `[col-span-4, col-span-8]`, full-bleed feature every 5th item. No card chrome — image meets caption directly with a hairline above.
+- `src/routes/work.index.tsx` ListView: large folio numbers on the left in vermilion, hairline rows, title sliding right on hover (already implemented) — keep.
+- `AboutSection`: add a **vermilion block marker** (8×8 filled square) before each section label ("About", "Trajectory", "Experience") instead of the current plain text.
 
-### 2f. Thinking, Contact, Footer
-
-- Apply the same hairline + grotesk + accent treatment so pages feel
-  unified. No structural changes beyond what falls out of the new tokens.
-
-### 2g. Motion — unchanged
-
-`motionConfig` values stay as-is. Page sweep, hero crossfade,
-ScrollReveal, list-hover slide, IndexCounter — all preserved. Only the
-visual chrome changes.
-
-## Out of scope
-
-- No CMS / admin changes this round.
-- No new content; copy stays.
-- No new dependencies (system grotesk fallbacks only — can swap to a real
-  Neue Haas / Helvetica Now webfont later if you want).
+---
 
 ## Files touched
 
-- **Renamed:** `src/routes/work.tsx` → `work.index.tsx`,
-  `src/routes/thinking.tsx` → `thinking.index.tsx`
-- **Edited tokens/global:** `src/styles.css`
-- **Edited components:** `CornerLabels.tsx`, `HeroRotator.tsx`,
-  `Footer.tsx`, `AboutSection.tsx`
-- **Edited routes:** `index.tsx`, `work.index.tsx`, `work.$slug.tsx`,
-  `thinking.index.tsx`, `thinking.$slug.tsx`, `contact.tsx`
+- `src/components/site/Cursor.tsx` (rewrite)
+- `src/components/site/Footer.tsx` (rewrite layout, filled bg)
+- `src/components/site/HeroRotator.tsx` (gradient → paper slab)
+- `src/components/site/CornerLabels.tsx` (solid bar, no blur/shadow)
+- `src/components/site/AboutSection.tsx` (square markers)
+- `src/components/ui/card.tsx`, `src/components/ui/button.tsx` (strip shadows/borders)
+- `src/routes/index.tsx` (Continue affordance tweak)
+- `src/routes/work.index.tsx` (toolbar, asymmetric grid)
+- `src/routes/work.$slug.tsx` (hero slab, tag chips)
+- `src/styles.css` (add `.poster-num`, `.block-marker` utilities; ensure no shadow tokens)
+
+## Out of scope
+
+- Routing / data / business logic — visual presentation only.
+- No font swaps; current grotesk stack stays.
+- No motion changes — all framer-motion timings preserved.

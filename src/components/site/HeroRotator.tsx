@@ -54,37 +54,38 @@ export function HeroRotator({ projects }: { projects: Project[] }) {
   const current = projects[i];
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-background">
-      {[0, 1].map((idx) => {
-        const p = layers[idx];
-        if (!p) return null;
-        const isFront = front === idx;
-        return (
-          <motion.div
-            key={idx}
-            className="absolute inset-0"
-            initial={false}
-            animate={{ opacity: isFront ? 1 : 0 }}
-            transition={{ duration: motionConfig.heroCrossfadeDuration, ease: motionConfig.ease }}
-            style={{ zIndex: isFront ? 1 : 0 }}
-          >
-            <img
-              src={heroFor(p)}
-              alt={p.title}
-              className="h-full w-full object-cover"
-              draggable={false}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-background/40" />
-          </motion.div>
-        );
-      })}
+    <div className="absolute inset-0 overflow-hidden bg-background flex flex-col">
+      {/* Image plane — top portion, hard-cropped */}
+      <div className="relative flex-1 overflow-hidden">
+        {[0, 1].map((idx) => {
+          const p = layers[idx];
+          if (!p) return null;
+          const isFront = front === idx;
+          return (
+            <motion.div
+              key={idx}
+              className="absolute inset-0"
+              initial={false}
+              animate={{ opacity: isFront ? 1 : 0 }}
+              transition={{ duration: motionConfig.heroCrossfadeDuration, ease: motionConfig.ease }}
+              style={{ zIndex: isFront ? 1 : 0 }}
+            >
+              <img
+                src={heroFor(p)}
+                alt={p.title}
+                className="h-full w-full object-cover"
+                draggable={false}
+              />
+            </motion.div>
+          );
+        })}
+      </div>
 
-      {/* Swiss caption block — bottom-left, 12-col mini-grid */}
-      <div className="relative z-10 flex h-full w-full items-end pointer-events-none">
-        <div
-          className="w-full pointer-events-auto"
-          style={{ padding: "calc(var(--site-padding-y) * 5) var(--site-padding-x)" }}
-        >
+      {/* Paper caption slab — hard horizontal edge against image */}
+      <div
+        className="relative z-10 bg-background border-t border-foreground"
+        style={{ padding: "calc(var(--site-padding-y) * 1.5) var(--site-padding-x) calc(var(--site-padding-y) * 2)" }}
+      >
           <AnimatePresence mode="wait">
             <motion.div
               key={current.id}
@@ -113,9 +114,8 @@ export function HeroRotator({ projects }: { projects: Project[] }) {
                 <div>{current.location}</div>
                 <div className="num">{current.year}</div>
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
