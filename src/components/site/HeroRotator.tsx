@@ -54,9 +54,9 @@ export function HeroRotator({ projects }: { projects: Project[] }) {
   const current = projects[i];
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-background flex flex-col">
-      {/* Image plane — top portion, hard-cropped */}
-      <div className="relative flex-1 overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden bg-background">
+      {/* Image plane — full bleed */}
+      <div className="absolute inset-0 overflow-hidden">
         {[0, 1].map((idx) => {
           const p = layers[idx];
           if (!p) return null;
@@ -81,41 +81,45 @@ export function HeroRotator({ projects }: { projects: Project[] }) {
         })}
       </div>
 
-      {/* Paper caption slab — hard horizontal edge against image */}
-      <div
-        className="relative z-10 bg-background border-t border-foreground"
-        style={{ padding: "calc(var(--site-padding-y) * 1.5) var(--site-padding-x) calc(var(--site-padding-y) * 2)" }}
-      >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current.id}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.7, ease: motionConfig.ease }}
-              className="grid grid-cols-12 gap-4 md:gap-6 items-end"
+      {/* Title + summary — bottom left, overlaid on image */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current.id + "-title"}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.7, ease: motionConfig.ease }}
+          className="absolute z-10 max-w-[60ch] text-background"
+          style={{
+            left: "var(--site-padding-x)",
+            bottom: "var(--site-padding-y)",
+            right: "var(--site-padding-x)",
+          }}
+        >
+          <Link to="/work/$slug" params={{ slug: current.slug }}>
+            <h1
+              className="display leading-[0.9] hover:opacity-80 transition-opacity"
+              style={{ fontSize: "clamp(2.5rem, 9vw, 8rem)" }}
             >
-              <div className="col-span-2 label label-muted num">
-                <span className="accent">{String(i + 1).padStart(2, "0")}</span>
-                <span className="opacity-40"> / {String(projects.length).padStart(2, "0")}</span>
-              </div>
-              <div className="col-span-12 md:col-span-6 -order-1 md:order-none">
-                <Link to="/work/$slug" params={{ slug: current.slug }}>
-                  <h1 className="display text-[clamp(2.5rem,7vw,6.5rem)] hover:opacity-80 transition-opacity">
-                    {current.title}
-                  </h1>
-                </Link>
-                <p className="mt-5 max-w-md text-sm leading-relaxed text-foreground/80">
-                  {current.summary}
-                </p>
-              </div>
-              <div className="col-span-10 md:col-span-4 label label-muted leading-[1.8]">
-                <div>{current.category}</div>
-                <div>{current.location}</div>
-                <div className="num">{current.year}</div>
-              </div>
-          </motion.div>
-        </AnimatePresence>
+              {current.title}
+            </h1>
+          </Link>
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-background/85">
+            {current.summary}
+          </p>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Slide counter — bottom right */}
+      <div
+        className="absolute z-10 label num text-background"
+        style={{
+          right: "var(--site-padding-x)",
+          bottom: "var(--site-padding-y)",
+        }}
+      >
+        <span className="accent">{String(i + 1).padStart(2, "0")}</span>
+        <span className="text-background/50"> / {String(projects.length).padStart(2, "0")}</span>
       </div>
     </div>
   );
