@@ -39,15 +39,15 @@
   --radius: 0px;
 
   /* Paper white canvas, near-black ink, mid grey meta, vermilion accent */
-  --background: oklch(0.985 0.003 90);          /* paper */
-  --foreground: oklch(0.16 0.01 260);           /* ink */
+  --background: oklch(0.985 0.003 90); /* paper */
+  --foreground: oklch(0.16 0.01 260); /* ink */
   --muted: oklch(0.95 0.004 90);
-  --muted-foreground: oklch(0.46 0.01 260);     /* mid grey for meta */
-  --border: oklch(0.16 0.01 260 / 0.14);        /* hairline */
+  --muted-foreground: oklch(0.46 0.01 260); /* mid grey for meta */
+  --border: oklch(0.16 0.01 260 / 0.14); /* hairline */
   --input: oklch(0.16 0.01 260 / 0.18);
   --ring: oklch(0.58 0.21 28 / 0.4);
 
-  --card: oklch(0.94 0.005 90);                 /* image placeholder */
+  --card: oklch(0.94 0.005 90); /* image placeholder */
   --card-foreground: var(--foreground);
   --popover: var(--background);
   --popover-foreground: var(--foreground);
@@ -64,12 +64,13 @@
   --destructive-foreground: oklch(0.985 0.003 90);
 
   /* Typography — grotesk stack, no webfont required */
-  --font-sans-stack: "Neue Haas Grotesk Display", "Helvetica Neue", "Inter Tight", Helvetica, Arial, system-ui, sans-serif;
+  --font-sans-stack:
+    "Neue Haas Grotesk Display", "Helvetica Neue", "Inter Tight", Helvetica, Arial, system-ui, sans-serif;
   --font-display-stack: var(--font-sans-stack);
 
   /* Layout tokens */
   --site-padding-x: clamp(24px, 3vw, 48px);
-  --site-padding-y: clamp(18px, 2.4vh, 28px);
+  --site-padding-y: clamp(site-padding-x);
   --grid-gap: clamp(16px, 1.6vw, 24px);
   --grid-cols: 6;
   --section-gap: clamp(96px, 14vh, 180px);
@@ -179,7 +180,9 @@
     padding: calc(var(--site-padding-y) * 4) var(--site-padding-x);
     width: 100%;
   }
-  .col-span-full { grid-column: 1 / -1; }
+  .col-span-full {
+    grid-column: 1 / -1;
+  }
 
   .grid-debug {
     pointer-events: none;
@@ -199,7 +202,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
