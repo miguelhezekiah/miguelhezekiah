@@ -45,12 +45,6 @@ function WorkDetail() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 1.4, ease: motionConfig.ease }}
         />
-      </div>
-      {/* Paper caption slab — hard horizontal break */}
-      <div
-        className="bg-background border-t border-foreground"
-        style={{ padding: "calc(var(--site-padding-y) * 2.5) var(--site-padding-x)" }}
-      >
         <div className="grid grid-cols-12 gap-4 md:gap-6 items-end">
           <div className="col-span-12 md:col-span-3 label label-muted flex flex-wrap gap-x-3">
             <span style={{ color: "var(--color-accent)" }}>{project.category}</span>
@@ -59,7 +53,9 @@ function WorkDetail() {
             <span>·</span>
             <span className="num">{project.year}</span>
           </div>
-          <h1 className="col-span-12 md:col-span-9 display text-[clamp(2.25rem,8vw,7rem)] leading-[0.92]">{project.title}</h1>
+          <h1 className="col-span-12 md:col-span-9 display text-[clamp(2.25rem,8vw,7rem)] leading-[0.92]">
+            {project.title}
+          </h1>
         </div>
       </div>
 
@@ -104,9 +100,7 @@ function WorkDetail() {
           </aside>
 
           <div className="md:col-span-8 lg:col-span-8 lg:col-start-5 space-y-10">
-            <p className="display text-2xl md:text-3xl leading-snug text-foreground/95">
-              {project.summary}
-            </p>
+            <p className="display text-2xl md:text-3xl leading-snug text-foreground/95">{project.summary}</p>
             <div className="space-y-6 text-base leading-relaxed text-foreground/85">
               {project.body.map((para, i) => (
                 <ScrollReveal key={i} delay={i * 0.05}>
@@ -137,11 +131,7 @@ function WorkDetail() {
             {chunkAsymmetric(project.gallery_urls).map((row, i) => (
               <div
                 key={i}
-                className={
-                  row.length === 1
-                    ? "grid grid-cols-1"
-                    : "grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6"
-                }
+                className={row.length === 1 ? "grid grid-cols-1" : "grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6"}
               >
                 {row.map((url, j) => (
                   <ScrollReveal key={url} delay={j * 0.05}>
