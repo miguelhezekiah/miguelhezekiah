@@ -7,8 +7,7 @@ import { useFooterVisible } from "@/lib/footer-visibility";
 
 export function CornerLabels() {
   const { pathname } = useLocation();
-  const activeNav =
-    siteConfig.nav.find((n) => pathname.startsWith(n.to)) ?? null;
+  const activeNav = siteConfig.nav.find((n) => pathname.startsWith(n.to)) ?? null;
   const idx = activeNav ? siteConfig.nav.indexOf(activeNav) : -1;
   const total = siteConfig.nav.length;
   const sectionLabel = activeNav?.label ?? "Index";
@@ -26,16 +25,13 @@ export function CornerLabels() {
       <motion.div
         animate={{ y: navHidden ? -56 : 0, opacity: navHidden ? 0 : 1 }}
         transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
-        className="pointer-events-auto w-full border-b border-foreground bg-background"
+        className="pointer-events-auto w-full bg-background"
       >
         <div
           className="flex items-center justify-between"
           style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
         >
-          <Link
-            to="/"
-            className="label flex items-center gap-2 hover:opacity-60 transition-opacity duration-300"
-          >
+          <Link to="/" className="label flex items-center gap-2 hover:opacity-60 transition-opacity duration-300">
             <span className="num accent">§</span>
             <span>{siteConfig.name}</span>
           </Link>
@@ -51,9 +47,7 @@ export function CornerLabels() {
                   <span className={`num text-[9px] ${isActive ? "accent" : "opacity-40"}`}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className={isActive ? "accent" : "opacity-60 hover:opacity-100"}>
-                    {n.label}
-                  </span>
+                  <span className={isActive ? "accent" : "opacity-60 hover:opacity-100"}>{n.label}</span>
                 </Link>
               );
             })}
@@ -78,7 +72,6 @@ export function CornerLabels() {
           </>
         )}
       </motion.div>
-
     </header>
   );
 }
