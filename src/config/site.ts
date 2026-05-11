@@ -4,8 +4,8 @@ export const siteConfig = {
   name: "Miguel Hezekiah",
   role: "Computational Designer",
   copyright: "©2026",
-  email: "hello@miguelhezekiah.com",
-  location: "Practice — Worldwide",
+  email: "miguelhezekiah@outlook.com",
+  location: "Anywhere",
   socials: {
     instagram: "https://instagram.com/",
     linkedin: "https://linkedin.com/",
@@ -22,7 +22,7 @@ export const siteConfig = {
       "Computational designer working at the seam of architecture, biology, and code. Form-finding, generative geometry, fabrication.",
     long: [
       "I design buildings, structures, and objects that are grown rather than drawn — letting biological growth rules, agent swarms, and topology optimisation produce form, then disciplining the result back into something that can be built.",
-      "Currently leading Studio Hyperform. Previously at ZHA, Foster + Partners, and TU Delft Hyperbody. Open to collaborations on pavilions, infrastructure, and cultural buildings.",
+      "Currently open to collaborations.",
     ],
   },
 } as const;
