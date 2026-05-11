@@ -51,14 +51,14 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const WorkSlugRoute = WorkSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => WorkRoute,
+  id: '/work/$slug',
+  path: '/work/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ThinkingSlugRoute = ThinkingSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ThinkingRoute,
+  id: '/thinking/$slug',
+  path: '/thinking/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
@@ -150,6 +150,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
+  ThinkingSlugRoute: typeof ThinkingSlugRoute
+  WorkSlugRoute: typeof WorkSlugRoute
   ThinkingIndexRoute: typeof ThinkingIndexRoute
   WorkIndexRoute: typeof WorkIndexRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -201,17 +203,17 @@ declare module '@tanstack/react-router' {
     }
     '/work/$slug': {
       id: '/work/$slug'
-      path: '/$slug'
+      path: '/work/$slug'
       fullPath: '/work/$slug'
       preLoaderRoute: typeof WorkSlugRouteImport
-      parentRoute: typeof WorkRoute
+      parentRoute: typeof rootRouteImport
     }
     '/thinking/$slug': {
       id: '/thinking/$slug'
-      path: '/$slug'
+      path: '/thinking/$slug'
       fullPath: '/thinking/$slug'
       preLoaderRoute: typeof ThinkingSlugRouteImport
-      parentRoute: typeof ThinkingRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
       id: '/admin/login'
@@ -246,6 +248,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
+  ThinkingSlugRoute: ThinkingSlugRoute,
+  WorkSlugRoute: WorkSlugRoute,
   ThinkingIndexRoute: ThinkingIndexRoute,
   WorkIndexRoute: WorkIndexRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
@@ -253,13 +257,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

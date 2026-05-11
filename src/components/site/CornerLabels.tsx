@@ -12,6 +12,7 @@ export function CornerLabels() {
   const idx = activeNav ? siteConfig.nav.indexOf(activeNav) : -1;
   const total = siteConfig.nav.length;
   const sectionLabel = activeNav?.label ?? "Index";
+  const sectionNum = idx >= 0 ? String(idx + 1).padStart(2, "0") : "00";
 
   const { direction, atTop } = useScrollDirection();
   const footerVisible = useFooterVisible();
@@ -20,59 +21,71 @@ export function CornerLabels() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <header className="pointer-events-none fixed inset-0 z-40">
-      {/* Wordmark — top left (hides on scroll-down like nav) */}
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-40">
+      {/* Top hairline-ruled bar — wordmark left, nav right */}
       <motion.div
-        animate={{ y: navHidden ? -40 : 0, opacity: navHidden ? 0 : 1 }}
+        animate={{ y: navHidden ? -56 : 0, opacity: navHidden ? 0 : 1 }}
         transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
-        className="pointer-events-auto absolute top-0 left-0 label"
-        style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
+        className="pointer-events-auto w-full border-b border-border bg-background/85 backdrop-blur-sm"
       >
-        <Link to="/" className="hover:opacity-60 transition-opacity duration-500">
-          {siteConfig.name}
-        </Link>
+        <div
+          className="flex items-center justify-between"
+          style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
+        >
+          <Link
+            to="/"
+            className="label flex items-center gap-2 hover:opacity-60 transition-opacity duration-300"
+          >
+            <span className="num accent">§</span>
+            <span>{siteConfig.name}</span>
+          </Link>
+          <nav className="label flex items-center gap-6">
+            {siteConfig.nav.map((n, i) => {
+              const isActive = activeNav?.to === n.to;
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  className="flex items-baseline gap-1.5 transition-opacity duration-300 hover:opacity-100"
+                >
+                  <span className={`num text-[9px] ${isActive ? "accent" : "opacity-40"}`}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className={isActive ? "accent" : "opacity-60 hover:opacity-100"}>
+                    {n.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       </motion.div>
 
-      {/* Nav — top right (hides on scroll-down) */}
-      <motion.nav
-        animate={{
-          y: navHidden ? -40 : 0,
-          opacity: navHidden ? 0 : 1,
-        }}
-        transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
-        className="pointer-events-auto absolute top-0 right-0 label flex gap-6"
-        style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
-      >
-        {siteConfig.nav.map((n) => (
-          <Link
-            key={n.to}
-            to={n.to}
-            className="transition-opacity duration-500 hover:opacity-100"
-            activeProps={{ className: "opacity-100" }}
-            inactiveProps={{ className: "opacity-50" }}
-          >
-            {n.label}
-          </Link>
-        ))}
-      </motion.nav>
-
-      {/* Bottom-left section + counter — hides when footer is visible (handed off to footer) */}
+      {/* Bottom-left section + counter */}
       <motion.div
         animate={{ opacity: footerVisible ? 0 : 1 }}
         transition={{ duration: 0.4 }}
-        className="pointer-events-auto absolute bottom-0 left-0 label label-muted flex items-center gap-3"
+        className="pointer-events-auto fixed bottom-0 left-0 label label-muted flex items-center gap-3"
         style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
       >
+        <span className="num accent">{sectionNum}</span>
+        <span className="opacity-50">/</span>
         <span>{sectionLabel}</span>
-        {idx >= 0 && <IndexCounter idx={idx} total={total} />}
+        {idx >= 0 && (
+          <>
+            <span className="opacity-30">·</span>
+            <IndexCounter idx={idx} total={total} />
+          </>
+        )}
       </motion.div>
 
-      {/* Bottom-right meta — hidden on small screens */}
+      {/* Bottom-right meta — 3 line stack */}
       <div
-        className="pointer-events-auto absolute bottom-0 right-0 label label-muted text-right hidden sm:block"
+        className="pointer-events-auto fixed bottom-0 right-0 label label-muted text-right hidden sm:block leading-[1.6]"
         style={{ padding: "var(--site-padding-y) var(--site-padding-x)" }}
       >
-        <div>{siteConfig.role}</div>
+        <div className="text-foreground">{siteConfig.role}</div>
+        <div>{siteConfig.location}</div>
         <div className="opacity-60">{siteConfig.copyright}</div>
       </div>
     </header>
