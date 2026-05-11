@@ -43,9 +43,7 @@ export function Footer() {
       <div className="grid grid-cols-12 gap-6 items-start">
         {/* Left — wordmark colophon */}
         <div className="col-span-12 md:col-span-4">
-          <div className="display text-[clamp(2rem,5vw,4rem)] leading-[0.9]">
-            {siteConfig.name}
-          </div>
+          <div className="display text-[clamp(2rem,5vw,4rem)] leading-[0.9]">{siteConfig.name}</div>
           <div className="label mt-4 opacity-60">{siteConfig.role}</div>
         </div>
 
@@ -59,18 +57,14 @@ export function Footer() {
               style={{ borderTop: "1px solid color-mix(in oklab, currentColor 22%, transparent)" }}
             >
               <dt className="col-span-4 label opacity-50">{k}</dt>
-              <dd className="col-span-8 label transition-colors group-hover:text-[color:var(--color-accent)]">
-                {v}
-              </dd>
+              <dd className="col-span-8 label transition-colors group-hover:text-[color:var(--color-accent)]">{v}</dd>
             </a>
           ))}
         </dl>
 
         {/* Right — folio */}
         <div className="col-span-12 md:col-span-3 mt-8 md:mt-0 flex flex-col items-start md:items-end gap-3">
-          <div className="display num text-[clamp(2.5rem,4vw,3.5rem)] leading-none">
-            © 26
-          </div>
+          <div className="display num text-[clamp(2.5rem,4vw,3.5rem)] leading-none">© '26</div>
           {idx >= 0 && (
             <div className="label opacity-60">
               <span className="num" style={{ color: "var(--color-accent)" }}>
