@@ -24,7 +24,7 @@ function ContactPage() {
       <div className="mx-auto w-full max-w-5xl">
         <div className="label label-muted mb-8">Contact</div>
         <h1 className="display text-[clamp(2.5rem,8vw,6.5rem)]">
-          Open to commissions, collaborations, lectures.
+          Open to commissions and collaborations.
         </h1>
         <div className="mt-16 grid gap-12 md:grid-cols-12">
           <div className="md:col-span-6">

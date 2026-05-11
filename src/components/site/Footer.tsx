@@ -56,8 +56,7 @@ export function Footer() {
               className="grid grid-cols-12 gap-3 py-3 group"
               style={{ borderTop: "1px solid color-mix(in oklab, currentColor 22%, transparent)" }}
             >
-              <dt className="col-span-4 label opacity-50">{k}</dt>
-              <dd className="col-span-8 label transition-colors group-hover:text-[color:var(--color-accent)]">{v}</dd>
+              <dt className="col-span-8 label transition-colors group-hover:text-[color:var(--color-accent)]">{k}</dt>
             </a>
           ))}
         </dl>

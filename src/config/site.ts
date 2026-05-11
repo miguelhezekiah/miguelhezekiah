@@ -7,8 +7,8 @@ export const siteConfig = {
   email: "miguelhezekiah@outlook.com",
   location: "Anywhere",
   socials: {
-    instagram: "https://instagram.com/",
-    linkedin: "https://linkedin.com/",
+    instagram: "https://instagram.com/hezekiahmiguel/",
+    linkedin: "https://linkedin.com/in/miguelhezekiah/",
     github: "https://github.com/miguelhezekiah",
   },
   // 4-section nav. Index (/) is reachable via the name in the top-left.

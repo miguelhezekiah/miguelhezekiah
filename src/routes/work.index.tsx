@@ -86,7 +86,7 @@ function WorkIndex() {
           <div>
             <div className="label label-muted mb-2">Work</div>
             <h1 className="display text-[clamp(2rem,5vw,4rem)]">
-              Selected — {filtered.length} project{filtered.length === 1 ? "" : "s"}
+              Selected project{filtered.length === 1 ? "" : "s"}
             </h1>
           </div>
         </div>
@@ -224,16 +224,13 @@ function GridView({ items }: { items: Project[] }) {
                       draggable={false}
                     />
                   </div>
-                  <div className="mt-3 border-t border-foreground pt-2 flex items-baseline justify-between gap-3">
+                  <div className="mt-3 flex items-baseline justify-between gap-3">
                     <div className="flex items-baseline gap-3">
-                      <span className="num label" style={{ color: "var(--color-accent)" }}>
-                        {String(globalIdx + 1).padStart(2, "0")}
-                      </span>
                       <span className="display text-lg md:text-2xl transition-transform duration-500 group-hover:-translate-y-0.5">
                         {p.title}
                       </span>
+                      <span className="label label-muted display text-lg md:text-2xl">{p.year}</span>
                     </div>
-                    <span className="label label-muted">{p.category} — {p.year}</span>
                   </div>
                 </Link>
               );
@@ -270,13 +267,10 @@ function ListView({ items }: { items: Project[] }) {
                   }}
                   transition={{ duration: motionConfig.hoverDuration, ease: motionConfig.ease }}
                 >
-                  <span className="opacity-40 mr-4 text-sm align-middle tabular-nums">
-                    {String(idx + 1).padStart(2, "0")}
-                  </span>
                   {p.title}
                 </motion.span>
                 <span className="label label-muted hidden md:block">
-                  {p.category} — {p.year}
+                  {p.year}
                 </span>
               </Link>
             </li>
