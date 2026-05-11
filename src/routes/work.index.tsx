@@ -92,7 +92,7 @@ function WorkIndex() {
         </div>
 
         {/* Toolbar */}
-        <div className="col-span-full flex flex-wrap items-center gap-x-6 gap-y-4 border-y border-border py-5 sticky top-0 bg-background/85 backdrop-blur z-30">
+        <div className="col-span-full flex flex-wrap items-center gap-x-6 gap-y-4 border-y border-foreground py-5 sticky top-0 bg-background z-30">
           <div className="flex items-center gap-3">
             <span className="label label-muted">View</span>
             {(["grid", "list"] as const).map((v) => (

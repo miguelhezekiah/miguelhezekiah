@@ -35,8 +35,8 @@ function WorkDetail() {
 
   return (
     <main className="relative">
-      {/* Full-bleed hero */}
-      <div className="relative h-[88dvh] w-full overflow-hidden bg-card">
+      {/* Full-bleed image */}
+      <div className="relative h-[72dvh] w-full overflow-hidden bg-card mt-12">
         <motion.img
           src={heroFor(project)}
           alt={project.title}
@@ -45,19 +45,21 @@ function WorkDetail() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 1.4, ease: motionConfig.ease }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <div
-          className="absolute inset-x-0 bottom-0"
-          style={{ padding: "calc(var(--site-padding-y) * 4) var(--site-padding-x)" }}
-        >
-          <div className="label label-muted mb-4 flex flex-wrap gap-x-4 gap-y-1">
-            <span>{project.category}</span>
-            <span className="opacity-40">·</span>
+      </div>
+      {/* Paper caption slab — hard horizontal break */}
+      <div
+        className="bg-background border-t border-foreground"
+        style={{ padding: "calc(var(--site-padding-y) * 2.5) var(--site-padding-x)" }}
+      >
+        <div className="grid grid-cols-12 gap-4 md:gap-6 items-end">
+          <div className="col-span-12 md:col-span-3 label label-muted flex flex-wrap gap-x-3">
+            <span style={{ color: "var(--color-accent)" }}>{project.category}</span>
+            <span>·</span>
             <span>{project.location}</span>
-            <span className="opacity-40">·</span>
-            <span>{project.year}</span>
+            <span>·</span>
+            <span className="num">{project.year}</span>
           </div>
-          <h1 className="display text-[clamp(2.25rem,8vw,7rem)] max-w-5xl leading-[0.95]">{project.title}</h1>
+          <h1 className="col-span-12 md:col-span-9 display text-[clamp(2.25rem,8vw,7rem)] leading-[0.92]">{project.title}</h1>
         </div>
       </div>
 
@@ -88,9 +90,10 @@ function WorkDetail() {
               {project.tags?.length > 0 && (
                 <div>
                   <div className="label label-muted mb-2">Tags</div>
-                  <div className="flex flex-wrap gap-2">
-                    {project.tags.map((t) => (
-                      <span key={t} className="label label-muted rounded-full border border-border px-2 py-1">
+                  <div className="label flex flex-wrap gap-x-2 gap-y-1">
+                    {project.tags.map((t, i) => (
+                      <span key={t}>
+                        {i > 0 && <span className="opacity-40 mr-2">·</span>}
                         {t}
                       </span>
                     ))}
