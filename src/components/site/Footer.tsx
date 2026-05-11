@@ -8,18 +8,16 @@ export function Footer() {
   const { pathname } = useLocation();
   const ref = useRef<HTMLElement | null>(null);
 
-  const activeNav =
-    siteConfig.nav.find((n) => pathname.startsWith(n.to)) ?? null;
+  const activeNav = siteConfig.nav.find((n) => pathname.startsWith(n.to)) ?? null;
   const idx = activeNav ? siteConfig.nav.indexOf(activeNav) : -1;
   const total = siteConfig.nav.length;
   const sectionLabel = activeNav?.label ?? "Index";
 
   useEffect(() => {
     if (!ref.current) return;
-    const obs = new IntersectionObserver(
-      ([e]) => setFooterVisible(e.isIntersecting),
-      { rootMargin: "0px 0px -20% 0px" },
-    );
+    const obs = new IntersectionObserver(([e]) => setFooterVisible(e.isIntersecting), {
+      rootMargin: "0px 0px -20% 0px",
+    });
     obs.observe(ref.current);
     return () => {
       obs.disconnect();
@@ -49,14 +47,16 @@ export function Footer() {
 
         {/* Right — socials */}
         <div className="col-span-6 md:col-span-4 label flex gap-4 md:gap-6 justify-end order-2 md:order-3">
-          <a href={siteConfig.socials.instagram} className="hover:opacity-60">Instagram</a>
-          <a href={siteConfig.socials.linkedin} className="hover:opacity-60">LinkedIn</a>
-          <a href={siteConfig.socials.github} className="hover:opacity-60">GitHub</a>
+          <a href={siteConfig.socials.instagram} className="hover:opacity-60">
+            Instagram
+          </a>
+          <a href={siteConfig.socials.linkedin} className="hover:opacity-60">
+            LinkedIn
+          </a>
+          <a href={siteConfig.socials.github} className="hover:opacity-60">
+            GitHub
+          </a>
         </div>
-      </div>
-
-      <div className="mt-10 label label-muted text-right">
-        {siteConfig.copyright} {siteConfig.name}
       </div>
     </footer>
   );
