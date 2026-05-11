@@ -12,7 +12,7 @@ const thinkingSearch = z.object({
   view: fallback(z.enum(["essays", "now"]), "essays").default("essays"),
 });
 
-export const Route = createFileRoute("/thinking")({
+export const Route = createFileRoute("/thinking/")({
   validateSearch: zodValidator(thinkingSearch),
   head: () => ({
     meta: [

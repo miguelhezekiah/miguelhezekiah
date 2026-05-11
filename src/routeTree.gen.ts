@@ -9,27 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WorkRouteImport } from './routes/work'
-import { Route as ThinkingRouteImport } from './routes/thinking'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkIndexRouteImport } from './routes/work.index'
+import { Route as ThinkingIndexRouteImport } from './routes/thinking.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as WorkSlugRouteImport } from './routes/work.$slug'
 import { Route as ThinkingSlugRouteImport } from './routes/thinking.$slug'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
-const WorkRoute = WorkRouteImport.update({
-  id: '/work',
-  path: '/work',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ThinkingRoute = ThinkingRouteImport.update({
-  id: '/thinking',
-  path: '/thinking',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -43,6 +33,16 @@ const AdminRoute = AdminRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkIndexRoute = WorkIndexRouteImport.update({
+  id: '/work/',
+  path: '/work/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThinkingIndexRoute = ThinkingIndexRouteImport.update({
+  id: '/thinking/',
+  path: '/thinking/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -76,23 +76,23 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
-  '/thinking': typeof ThinkingRouteWithChildren
-  '/work': typeof WorkRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/thinking/$slug': typeof ThinkingSlugRoute
   '/work/$slug': typeof WorkSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/thinking/': typeof ThinkingIndexRoute
+  '/work/': typeof WorkIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
-  '/thinking': typeof ThinkingRouteWithChildren
-  '/work': typeof WorkRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/thinking/$slug': typeof ThinkingSlugRoute
   '/work/$slug': typeof WorkSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/thinking': typeof ThinkingIndexRoute
+  '/work': typeof WorkIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -100,12 +100,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/contact': typeof ContactRoute
-  '/thinking': typeof ThinkingRouteWithChildren
-  '/work': typeof WorkRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/thinking/$slug': typeof ThinkingSlugRoute
   '/work/$slug': typeof WorkSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/thinking/': typeof ThinkingIndexRoute
+  '/work/': typeof WorkIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -114,35 +114,35 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/contact'
-    | '/thinking'
-    | '/work'
     | '/admin/login'
     | '/thinking/$slug'
     | '/work/$slug'
     | '/admin/'
+    | '/thinking/'
+    | '/work/'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/contact'
-    | '/thinking'
-    | '/work'
     | '/admin/login'
     | '/thinking/$slug'
     | '/work/$slug'
     | '/admin'
+    | '/thinking'
+    | '/work'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/contact'
-    | '/thinking'
-    | '/work'
     | '/admin/login'
     | '/thinking/$slug'
     | '/work/$slug'
     | '/admin/'
+    | '/thinking/'
+    | '/work/'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -150,27 +150,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ContactRoute: typeof ContactRoute
-  ThinkingRoute: typeof ThinkingRouteWithChildren
-  WorkRoute: typeof WorkRouteWithChildren
+  ThinkingIndexRoute: typeof ThinkingIndexRoute
+  WorkIndexRoute: typeof WorkIndexRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/work': {
-      id: '/work'
-      path: '/work'
-      fullPath: '/work'
-      preLoaderRoute: typeof WorkRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/thinking': {
-      id: '/thinking'
-      path: '/thinking'
-      fullPath: '/thinking'
-      preLoaderRoute: typeof ThinkingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -190,6 +176,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work/': {
+      id: '/work/'
+      path: '/work'
+      fullPath: '/work/'
+      preLoaderRoute: typeof WorkIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/thinking/': {
+      id: '/thinking/'
+      path: '/thinking'
+      fullPath: '/thinking/'
+      preLoaderRoute: typeof ThinkingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -242,34 +242,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface ThinkingRouteChildren {
-  ThinkingSlugRoute: typeof ThinkingSlugRoute
-}
-
-const ThinkingRouteChildren: ThinkingRouteChildren = {
-  ThinkingSlugRoute: ThinkingSlugRoute,
-}
-
-const ThinkingRouteWithChildren = ThinkingRoute._addFileChildren(
-  ThinkingRouteChildren,
-)
-
-interface WorkRouteChildren {
-  WorkSlugRoute: typeof WorkSlugRoute
-}
-
-const WorkRouteChildren: WorkRouteChildren = {
-  WorkSlugRoute: WorkSlugRoute,
-}
-
-const WorkRouteWithChildren = WorkRoute._addFileChildren(WorkRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ContactRoute: ContactRoute,
-  ThinkingRoute: ThinkingRouteWithChildren,
-  WorkRoute: WorkRouteWithChildren,
+  ThinkingIndexRoute: ThinkingIndexRoute,
+  WorkIndexRoute: WorkIndexRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport

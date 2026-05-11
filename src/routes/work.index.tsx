@@ -22,7 +22,7 @@ const workSearchSchema = z.object({
   tag: fallback(z.array(z.string()), []).default([]),
 });
 
-export const Route = createFileRoute("/work")({
+export const Route = createFileRoute("/work/")({
   validateSearch: zodValidator(workSearchSchema),
   head: () => ({
     meta: [
