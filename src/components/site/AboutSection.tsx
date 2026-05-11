@@ -11,7 +11,10 @@ export function AboutSection() {
     <section className="pt-24 md:pt-32">
       <PageGrid>
         <div className="col-span-full md:col-span-8">
-          <div className="label label-muted mb-6">About</div>
+          <div className="label label-muted mb-6 flex items-center gap-2">
+            <span className="inline-block h-2 w-2" style={{ background: "var(--color-accent)" }} />
+            About
+          </div>
           <h1 className="display text-[clamp(2rem,5vw,4rem)]">{siteConfig.bio.short}</h1>
           <div className="mt-12 max-w-2xl space-y-6 text-base leading-relaxed text-foreground/85">
             {siteConfig.bio.long.map((p, i) => (
@@ -23,14 +26,20 @@ export function AboutSection() {
         </div>
 
         {/* Animated timeline */}
-        <div className="col-span-full mt-24 md:mt-32 border-t border-border pt-12">
-          <div className="label label-muted mb-8">Trajectory</div>
+        <div className="col-span-full mt-24 md:mt-32 border-t border-foreground pt-12">
+          <div className="label label-muted mb-8 flex items-center gap-2">
+            <span className="inline-block h-2 w-2" style={{ background: "var(--color-accent)" }} />
+            Trajectory
+          </div>
           <TimelineGraphic />
         </div>
 
         {/* Experience */}
-        <div className="col-span-full mt-24 md:mt-32 border-t border-border pt-12">
-          <div className="label label-muted mb-8">Experience</div>
+        <div className="col-span-full mt-24 md:mt-32 border-t border-foreground pt-12">
+          <div className="label label-muted mb-8 flex items-center gap-2">
+            <span className="inline-block h-2 w-2" style={{ background: "var(--color-accent)" }} />
+            Experience
+          </div>
           <ul className="divide-y divide-border">
             {experience.map((e, i) => (
               <ScrollReveal key={e.id} delay={i * 0.04}>
